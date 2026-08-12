@@ -1,0 +1,12 @@
+build/
+.gradle/
+*.class
+*.jar
+*.exe
+*.dmg
+*.deb
+*.msi
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
