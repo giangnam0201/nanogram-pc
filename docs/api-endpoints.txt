@@ -1,0 +1,147 @@
+
+### a81
+GET    v2/games/leaderboard                          Object a(ko0<? super ry2> ko0Var)
+GET    v2/genres/{genreId}/games                     Object b(@qy3("genreId") String str, @id4("limit") int i, @id4("cursor") String str2, ko0<? super l62> ko0Var)
+GET    v2/users/search                               Object c(@id4("q") String str, @id4("limit") int i, @id4("cursor") String str2, ko0<? super cv5> ko0Var)
+GET    v2/discover                                   Object d(ko0<? super fb1> ko0Var)
+GET    v2/games/search                               Object e(@id4("q") String str, @id4("limit") int i, @id4("cursor") String str2, ko0<? super q32> ko0Var)
+
+### co1
+POST   v2/feedback                                   Object a(@f00 ho1 ho1Var, ko0<? super fd0> ko0Var)
+
+### eb4
+GET    public/invite/{code}                          Object a(@qy3("code") String str, ko0<? super ro2> ko0Var)
+
+### em
+GET    v2/me                                         Object a(ko0<? super i93> ko0Var)
+GET    auth/check-username                           Object b(@id4("username") String str, ko0<? super wt> ko0Var)
+POST   auth/avatar                                   Object c(@fy3 pe3 pe3Var, ko0<? super fd0> ko0Var)
+POST   auth/date-of-birth                            Object d(@f00 v15 v15Var, ko0<? super fd0> ko0Var)
+POST   auth/discord                                  Object e(@f00 b13 b13Var, ko0<? super co5> ko0Var)
+POST   auth/logout                                   Object f(@f00 s43 s43Var, ko0<? super fd0> ko0Var)
+POST   auth/link-discord                             Object g(@f00 b13 b13Var, ko0<? super fd0> ko0Var)
+PUT    v2/me/age                                     Object h(@f00 eu5 eu5Var, ko0<? super zs5> ko0Var)
+POST   v2/auth/email/request                         Object i(@f00 uh1 uh1Var, ko0<? super fd0> ko0Var)
+PATCH  v2/me                                         Object j(@f00 oy3 oy3Var, ko0<? super i93> ko0Var)
+DELETE auth/avatar                                   Object k(ko0<? super fd0> ko0Var)
+POST   v2/auth/onboarding                            Object l(@f00 xh0 xh0Var, ko0<? super fd0> ko0Var)
+POST   v2/me/referral                                Object m(@f00 wb0 wb0Var, ko0<? super fd0> ko0Var)
+POST   auth/link-email                               Object n(@f00 f13 f13Var, ko0<? super fd0> ko0Var)
+POST   v2/auth/email/verify                          Object o(@f00 di1 di1Var, ko0<? super co5> ko0Var)
+POST   auth/unlink-discord                           Object p(ko0<? super fd0> ko0Var)
+POST   v2/auth/google                                Object q(@f00 v92 v92Var, ko0<? super co5> ko0Var)
+
+### ew0
+GET    v2/gamegen/credits                            Object a(ko0<? super hw0> ko0Var)
+GET    credits/transactions                          Object b(@id4("limit") int i, @id4("cursor") Integer num, ko0<? super uv0> ko0Var)
+GET    v2/me/achievements                            Object c(ko0<? super n83> ko0Var)
+
+### h82
+GET    v1/gifs/search                                Object a(@id4("api_key") String str, @id4("q") String str2, @id4("limit") int i, @id4("offset") int i2, @id4("rating") String str3, @id4("lang") Strin
+GET    v1/gifs/trending                              Object b(@id4("api_key") String str, @id4("limit") int i, @id4("offset") int i2, @id4("rating") String str2, @id4("bundle") String str3, ko0<? super w
+
+### ix5
+GET    v2/latest-acceptable-version                  Object a(ko0<? super lx5> ko0Var)
+
+### j5
+POST   v2/analytics/events                           Object a(@pb2("X-Session-Id") String str, @f00 m5 m5Var, ko0<? super fd0> ko0Var)
+
+### k42
+POST   v2/gamegen/sessions/{id}/thumbnail/regenerate Object a(@qy3("id") String str, @f00 wg4 wg4Var, ko0<? super zg4> ko0Var)
+POST   v2/gamegen/sessions/{id}/messages             Object b(@qy3("id") String str, @f00 iz4 iz4Var, ko0<? super lz4> ko0Var)
+GET    v2/gamegen/in-flight                          Object c(ko0<? super ai2> ko0Var)
+GET    v2/gamegen/sessions/{id}/messages             Object d(@qy3("id") String str, ko0<? super oa3> ko0Var)
+POST   v2/gamegen/sessions/{id}/publish              Object e(@qy3("id") String str, @f00 cc4 cc4Var, ko0<? super fc4> ko0Var)
+POST   v2/gamegen/sessions                           Object f(@f00 ju0 ju0Var, ko0<? super mu0> ko0Var)
+POST   v2/gamegen/sessions/{id}/revert               Object g(@qy3("id") String str, @f00 tn4 tn4Var, ko0<? super zs5> ko0Var)
+
+### l52
+PUT    v2/me/genres                                  Object a(@f00 z15 z15Var, ko0<? super fd0> ko0Var)
+GET    v2/genres                                     Object b(ko0<? super List<i62>> ko0Var)
+GET    v2/me/genres                                  Object c(ko0<? super pg3> ko0Var)
+
+### m02
+POST   v2/games/{id}/share                           Object a(@qy3("id") String str, ko0<? super l65> ko0Var)
+GET    games/feed                                    Object b(@id4("count") int i, @id4("userId") String str, ko0<? super wn1> ko0Var)
+GET    v2/games/{id}                                 Object c(@qy3("id") String str, ko0<? super f42> ko0Var)
+DELETE v2/games/{id}/save                            Object d(@qy3("id") String str, ko0<? super br4> ko0Var)
+DELETE v2/games/{id}/like                            Object e(@qy3("id") String str, ko0<? super i03> ko0Var)
+POST   v2/games/{id}/like                            Object f(@qy3("id") String str, ko0<? super i03> ko0Var)
+GET    games/{id}/stats                              Object g(@qy3("id") String str, @id4("userId") String str2, ko0<? super u32> ko0Var)
+POST   v2/games/{id}/save                            Object h(@qy3("id") String str, ko0<? super br4> ko0Var)
+POST   v2/games/{id}/share-click                     Object i(@qy3("id") String str, @f00 x55 x55Var, ko0<? super zs5> ko0Var)
+
+### m70
+GET    v2/blocks                                     Object a(ko0<? super p13> ko0Var)
+DELETE v2/blocks/{userId}                            Object b(@qy3("userId") String str, ko0<? super x80> ko0Var)
+DELETE v2/chats/{chatId}/messages/{messageId}/all    Object c(@qy3("chatId") String str, @qy3("messageId") String str2, ko0<? super x80> ko0Var)
+POST   v2/chats/{chatId}/typing                      Object d(@qy3("chatId") String str, ko0<? super x80> ko0Var)
+GET    v2/chats/{chatId}/messages                    Object e(@qy3("chatId") String str, @id4("cursor") String str2, @id4("limit") int i, ko0<? super u13> ko0Var)
+POST   v2/chats/{chatId}/messages                    Object f(@qy3("chatId") String str, @f00 fz4 fz4Var, ko0<? super q80> ko0Var)
+GET    v2/chats                                      Object g(@id4("cursor") String str, @id4("limit") int i, ko0<? super x13> ko0Var)
+GET    v2/chats/{chatId}                             Object h(@qy3("chatId") String str, ko0<? super q70> ko0Var)
+POST   v2/chats/{chatId}/accept                      Object i(@qy3("chatId") String str, ko0<? super q70> ko0Var)
+DELETE v2/chats/{chatId}                             Object j(@qy3("chatId") String str, ko0<? super x80> ko0Var)
+POST   v2/chats/{chatId}/read                        Object k(@qy3("chatId") String str, @f00 z73 z73Var, ko0<? super x80> ko0Var)
+POST   v2/blocks                                     Object l(@f00 oz ozVar, ko0<? super x80> ko0Var)
+GET    v2/chats/search                               Object m(@id4("q") String str, ko0<? super ba0> ko0Var)
+GET    v2/chats/requests                             Object n(@id4("cursor") String str, @id4("limit") int i, ko0<? super x13> ko0Var)
+POST   v2/chats/{chatId}/report                      Object o(@qy3("chatId") String str, @f00 al4 al4Var, ko0<? super x80> ko0Var)
+DELETE v2/chats/{chatId}/messages/{messageId}        Object p(@qy3("chatId") String str, @qy3("messageId") String str2, ko0<? super x80> ko0Var)
+POST   v2/chats                                      Object q(@f00 ws0 ws0Var, ko0<? super q70> ko0Var)
+
+### pf0
+GET    v2/games/{id}/comments                        Object a(@qy3("id") String str, @id4("limit") int i, @id4("cursor") String str2, ko0<? super ag0> ko0Var)
+DELETE v2/games/{id}/comments/{commentId}/like       Object b(@qy3("id") String str, @qy3("commentId") String str2, ko0<? super xf0> ko0Var)
+GET    v2/games/{id}/comments/{commentId}/replies    Object c(@qy3("id") String str, @qy3("commentId") String str2, @id4("limit") int i, @id4("cursor") String str3, ko0<? super gg0> ko0Var)
+POST   v2/games/{id}/comments/{commentId}/report     Object d(@qy3("id") String str, @qy3("commentId") String str2, @f00 dl4 dl4Var, ko0<? super fd0> ko0Var)
+DELETE v2/games/{id}/comments/{commentId}            Object e(@qy3("id") String str, @qy3("commentId") String str2, ko0<? super h41> ko0Var)
+POST   v2/games/{id}/comments                        Object f(@qy3("id") String str, @f00 at0 at0Var, ko0<? super dt0> ko0Var)
+POST   v2/games/{id}/comments/{commentId}/like       Object g(@qy3("id") String str, @qy3("commentId") String str2, ko0<? super xf0> ko0Var)
+
+### t35
+GET    notifications/preferences                     Object a(ko0<? super en3> ko0Var)
+PUT    notifications/preferences                     Object b(@f00 en3 en3Var, ko0<? super en3> ko0Var)
+GET    v2/me/parental-controls                       Object d(ko0<? super xx3> ko0Var)
+POST   device-tokens                                 Object e(@f00 s51 s51Var, ko0<? super fd0> ko0Var)
+POST   v2/me/parental-controls                       Object f(@f00 ij1 ij1Var, ko0<? super xx3> ko0Var)
+PATCH  v2/me/parental-controls                       Object g(@f00 tq2 tq2Var, ko0<? super xx3> ko0Var)
+POST   v2/me/parental-controls/reset-pin/request     Object h(ko0<? super fd0> ko0Var)
+POST   v2/me/parental-controls/reset-pin/verify      Object j(@f00 hx5 hx5Var, ko0<? super fd0> ko0Var)
+
+### ts0
+GET    v2/gamegen/sessions                           Object a(@id4("cursor") String str, @id4("limit") int i, ko0<? super o15> ko0Var)
+GET    v2/gamegen/styles                             Object b(ko0<? super df5> ko0Var)
+DELETE v2/gamegen/sessions/{id}                      Object c(@qy3("id") String str, ko0<? super zs5> ko0Var)
+POST   v2/gamegen/prompt-breakdown                   Object d(@f00 w94 w94Var, ko0<? super z94> ko0Var)
+
+### un3
+GET    v2/notifications                              Object a(@id4("cursor") String str, @id4("limit") int i, ko0<? super xn3> ko0Var)
+GET    notifications/unread-count                    Object b(ko0<? super mt5> ko0Var)
+POST   notifications/read                            Object c(@f00 c83 c83Var, ko0<? super fd0> ko0Var)
+POST   notifications/read-all                        Object d(ko0<? super fd0> ko0Var)
+
+### xk4
+POST   v2/games/{id}/report                          Object a(@qy3("id") String str, @fy3("type") yl4 yl4Var, @fy3("details") yl4 yl4Var2, @fy3 pe3 pe3Var, ko0<? super ql4> ko0Var)
+
+### yl0
+GET    config                                        Object a(ko0<? super oc0> ko0Var)
+
+### z64
+POST   v2/users/{userId}/report                      Object a(@qy3("userId") String str, @f00 tl4 tl4Var, ko0<? super wl4> ko0Var)
+GET    v2/me/games                                   Object b(@id4("limit") int i, @id4("cursor") String str, ko0<? super c93> ko0Var)
+PATCH  v2/games/{id}                                 Object c(@qy3("id") String str, @f00 qk4 qk4Var, ko0<? super zs5> ko0Var)
+GET    v2/users/{userId}                             Object d(@qy3("userId") String str, ko0<? super zu5> ko0Var)
+GET    v2/users/{userId}/games                       Object e(@qy3("userId") String str, @id4("limit") int i, @id4("cursor") String str2, ko0<? super c93> ko0Var)
+DELETE v2/games/{id}                                 Object f(@qy3("id") String str, ko0<? super zs5> ko0Var)
+GET    v2/users/{userId}/following                   Object g(@qy3("userId") String str, @id4("limit") int i, @id4("cursor") String str2, ko0<? super kv1> ko0Var)
+GET    v2/users/{userId}/followers                   Object h(@qy3("userId") String str, @id4("limit") int i, @id4("cursor") String str2, ko0<? super kv1> ko0Var)
+GET    v2/me/saved                                   Object i(@id4("limit") int i, @id4("cursor") String str, ko0<? super c93> ko0Var)
+
+### zu1
+DELETE v2/users/{userId}/follow                      Object a(@qy3("userId") String str, ko0<? super wv1> ko0Var)
+POST   v2/users/{userId}/follow                      Object b(@qy3("userId") String str, ko0<? super wv1> ko0Var)
+
+### zy1
+GET    v2/me/friends/search                          Object a(@id4("q") String str, @id4("limit") int i, @id4("cursor") String str2, ko0<? super gz1> ko0Var)
+GET    v2/me/friends                                 Object b(@id4("limit") int i, @id4("cursor") String str, ko0<? super gz1> ko0Var)

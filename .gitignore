@@ -1,12 +1,24 @@
-build/
-.gradle/
-*.class
-*.jar
-*.exe
-*.dmg
-*.deb
-*.msi
+# frontend
+node_modules/
+dist/
+.vite/
+
+# rust / tauri
+src-tauri/target/
+src-tauri/gen/
+src-tauri/icons/
+
+# editors / os
 .idea/
+.vscode/
 *.iml
 .DS_Store
 Thumbs.db
+
+# build output
+*.exe
+*.msi
+*.dmg
+*.deb
+*.AppImage
+*.rpm

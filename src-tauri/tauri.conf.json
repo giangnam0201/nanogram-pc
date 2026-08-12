@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Nanogram",
+  "version": "1.1.0",
+  "identifier": "app.nanogram.pc",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5183",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Nanogram",
+        "width": 1280,
+        "height": 840,
+        "minWidth": 880,
+        "minHeight": 620,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true,
+        "decorations": true,
+        "theme": "Dark",
+        "backgroundColor": "#0D0D0D",
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": {
+        "default-src": "'self'",
+        "script-src": "'self' 'wasm-unsafe-eval'",
+        "style-src": "'self' 'unsafe-inline'",
+        "font-src": "'self' data:",
+        "img-src": "'self' data: blob: https:",
+        "media-src": "'self' data: blob: https:",
+        "connect-src": "'self' ipc: http://ipc.localhost https://api.nanogram.app https://games.nanogram.app https:",
+        "frame-src": "https://games.nanogram.app",
+        "worker-src": "'self' blob:"
+      },
+      "assetProtocol": {
+        "enable": true,
+        "scope": []
+      }
+    },
+    "withGlobalTauri": false
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "msi", "deb", "appimage", "dmg", "app"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "copyright": "Nanogram PC",
+    "category": "Game",
+    "shortDescription": "Play, create, remix and share instant games",
+    "longDescription": "Nanogram for desktop — play, create, remix and share short instant games.",
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    },
+    "linux": {
+      "deb": {
+        "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0"]
+      }
+    }
+  },
+  "plugins": {}
+}

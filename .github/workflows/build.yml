@@ -1,129 +1,144 @@
-name: Build Native Executables
+name: build
 
 on:
   push:
     branches: [main, master]
     tags: ['v*']
   pull_request:
-    branches: [main, master]
   workflow_dispatch:
 
-permissions:
-  contents: write
+env:
+  CARGO_TERM_COLOR: always
+  # Keep CI builds lean; the release profile already tunes size.
+  CARGO_INCREMENTAL: 0
 
 jobs:
-  build-windows:
-    name: Windows
-    runs-on: windows-latest
-    timeout-minutes: 30
+  # Fast feedback: typecheck the UI and compile-check Rust on one runner.
+  check:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with: { java-version: '21', distribution: 'temurin' }
 
-      - name: Install Gradle
-        shell: pwsh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Linux webview deps
         run: |
-          $url = "https://services.gradle.org/distributions/gradle-8.12-bin.zip"
-          $zip = "$env:RUNNER_TEMP\gradle.zip"
-          $dest = "$env:RUNNER_TEMP\gradle"
-          Invoke-WebRequest -Uri $url -OutFile $zip
-          Expand-Archive -Path $zip -DestinationPath $dest -Force
-          $gradleBin = Get-ChildItem -Path $dest -Directory | Select-Object -First 1
-          echo "$($gradleBin.FullName)\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf libgtk-3-dev
 
-      - name: Build
-        run: gradle createDistributable
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
 
-      - name: Package artifact
-        shell: pwsh
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - run: npm ci
+      - name: Typecheck + build frontend
+        run: npm run build
+
+      - name: Rust format
+        working-directory: src-tauri
+        run: cargo fmt --check
+
+      - name: Rust clippy
+        working-directory: src-tauri
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Rust tests
+        working-directory: src-tauri
+        run: cargo test
+
+  bundle:
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            name: windows-x64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            name: macos-arm64
+          - os: macos-13
+            target: x86_64-apple-darwin
+            name: macos-x64
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            name: linux-x64
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Linux webview deps
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
-          Get-ChildItem -Path build/compose/binaries/main -Recurse -Depth 3 | Select-Object FullName, Length
-          echo "---"
-          if (Test-Path build/compose/binaries/main/app) {
-            Compress-Archive -Path build/compose/binaries/main/app -DestinationPath nanogram-pc-windows.zip
-          } elseif (Test-Path build/compose/binaries/main/exe) {
-            Compress-Archive -Path build/compose/binaries/main/exe -DestinationPath nanogram-pc-windows.zip
-          } else {
-            Compress-Archive -Path build/compose/binaries/main -DestinationPath nanogram-pc-windows.zip
-          }
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf libgtk-3-dev file desktop-file-utils
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          key: ${{ matrix.target }}
+
+      - run: npm ci
+
+      - name: Generate app icons
+        run: npx tauri icon src/assets/img/app_icon.png
+
+      - name: Build bundle
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --target ${{ matrix.target }}
+
+      - name: Collect artifacts
+        shell: bash
+        run: |
+          mkdir -p out
+          base="src-tauri/target/${{ matrix.target }}/release/bundle"
+          find "$base" -type f \
+            \( -name '*.exe' -o -name '*.msi' -o -name '*.dmg' \
+               -o -name '*.deb' -o -name '*.AppImage' -o -name '*.rpm' \) \
+            -exec cp {} out/ \; 2>/dev/null || true
+          ls -la out
 
       - uses: actions/upload-artifact@v4
         with:
-          name: nanogram-pc-windows
-          path: nanogram-pc-windows.zip
-
-  build-linux:
-    name: Linux
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with: { java-version: '21', distribution: 'temurin' }
-
-      - name: Install Gradle & deps
-        run: |
-          sudo apt-get update && sudo apt-get install -y dpkg-dev fakeroot rpm
-          curl -sL https://services.gradle.org/distributions/gradle-8.12-bin.zip -o /tmp/gradle.zip
-          unzip -q /tmp/gradle.zip -d /tmp
-          echo "/tmp/gradle-8.12/bin" >> $GITHUB_PATH
-
-      - name: Build
-        run: gradle createDistributable
-
-      - name: List build output
-        run: find build -type f | head -30
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nanogram-pc-linux
-          path: |
-            build/compose/binaries/**/*.deb
-            build/compose/binaries/**/*.rpm
-            build/compose/binaries/**/nanogram-pc*
-
-  build-macos:
-    name: macOS
-    runs-on: macos-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with: { java-version: '21', distribution: 'temurin' }
-
-      - name: Install Gradle
-        run: |
-          curl -sL https://services.gradle.org/distributions/gradle-8.12-bin.zip -o /tmp/gradle.zip
-          unzip -q /tmp/gradle.zip -d /tmp
-          echo "/tmp/gradle-8.12/bin" >> $GITHUB_PATH
-
-      - name: Build
-        run: gradle createDistributable
-
-      - name: List build output
-        run: find build -type f | head -30
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nanogram-pc-macos
-          path: |
-            build/compose/binaries/**/*.dmg
-            build/compose/binaries/**/*.app/**
+          name: nanogram-${{ matrix.name }}
+          path: out/*
+          if-no-files-found: error
 
   release:
-    name: Release
-    runs-on: ubuntu-latest
-    needs: [build-windows, build-linux, build-macos]
+    needs: bundle
     if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v4
-        with: { path: release-files }
-      - uses: softprops/action-gh-release@v2
         with:
-          name: "Nanogram PC ${{ github.ref_name }}"
-          files: release-files/**/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: artifacts
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true

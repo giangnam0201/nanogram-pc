@@ -1,0 +1,29 @@
+{
+  "name": "nanogram-pc",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Nanogram for desktop — Windows, macOS, Linux",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "app": "tauri dev",
+    "app:build": "tauri build"
+  },
+  "dependencies": {
+    "@preact/signals": "^2.0.1",
+    "preact": "^10.26.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/api": "^2.2.0",
+    "@tauri-apps/cli": "^2.2.7",
+    "@tauri-apps/plugin-opener": "^2.2.6",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true
+  }
+}

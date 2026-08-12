@@ -1,0 +1,2890 @@
+{
+ "androidx.savedstate.serialization.serializers.SparseArraySerializer.SparseArraySurrogate": [
+  {
+   "name": "keys",
+   "optional": false
+  },
+  {
+   "name": "values",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.AgeRangeDTO": [
+  {
+   "name": "lower",
+   "optional": true
+  },
+  {
+   "name": "upper",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.AvailabilityResponseDTO": [
+  {
+   "name": "available",
+   "optional": false
+  },
+  {
+   "name": "code",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.ClaimReferralRequestDTO": [
+  {
+   "name": "referralCode",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.CodeResponseDTO": [
+  {
+   "name": "code",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.CompleteOnboardingNanotagDTO": [
+  {
+   "name": "colorPreset",
+   "optional": false
+  },
+  {
+   "name": "chaosPercentage",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.CompleteOnboardingRequestDTO": [
+  {
+   "name": "username",
+   "optional": false
+  },
+  {
+   "name": "dateOfBirth",
+   "optional": true
+  },
+  {
+   "name": "ageRange",
+   "optional": true
+  },
+  {
+   "name": "referralCode",
+   "optional": false
+  },
+  {
+   "name": "nanotag",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.EmailOtpRequestDTO": [
+  {
+   "name": "email",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.EmailOtpVerifyDTO": [
+  {
+   "name": "email",
+   "optional": false
+  },
+  {
+   "name": "code",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.GoogleLoginRequestDTO": [
+  {
+   "name": "idToken",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.LinkDiscordRequestDTO": [
+  {
+   "name": "code",
+   "optional": false
+  },
+  {
+   "name": "redirectUri",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.LinkEmailRequestDTO": [
+  {
+   "name": "email",
+   "optional": false
+  },
+  {
+   "name": "password",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.LogoutRequestDTO": [
+  {
+   "name": "refreshToken",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.MeStatsDTO": [
+  {
+   "name": "games",
+   "optional": true
+  },
+  {
+   "name": "likes",
+   "optional": true
+  },
+  {
+   "name": "remixes",
+   "optional": true
+  },
+  {
+   "name": "shares",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.MeV2ResponseDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "email",
+   "optional": true
+  },
+  {
+   "name": "pendingEmail",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "bio",
+   "optional": true
+  },
+  {
+   "name": "dateOfBirth",
+   "optional": true
+  },
+  {
+   "name": "followersCount",
+   "optional": true
+  },
+  {
+   "name": "followingCount",
+   "optional": true
+  },
+  {
+   "name": "games",
+   "optional": true
+  },
+  {
+   "name": "stats",
+   "optional": true
+  },
+  {
+   "name": "chatUnreadCount",
+   "optional": true
+  },
+  {
+   "name": "connectedAuths",
+   "optional": true
+  },
+  {
+   "name": "referralCode",
+   "optional": true
+  },
+  {
+   "name": "onboarding",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  },
+  {
+   "name": "ageRange",
+   "optional": true
+  },
+  {
+   "name": "parentalControls",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.NanotagV2DTO": [
+  {
+   "name": "source",
+   "optional": true
+  },
+  {
+   "name": "colorPreset",
+   "optional": true
+  },
+  {
+   "name": "chaosPercentage",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.OnboardingAgeRangeDTO": [
+  {
+   "name": "lower",
+   "optional": false
+  },
+  {
+   "name": "upper",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.OnboardingDTO": [
+  {
+   "name": "completed",
+   "optional": true
+  },
+  {
+   "name": "requiredSteps",
+   "optional": true
+  },
+  {
+   "name": "optionalSteps",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.ParentalControlsDTO": [
+  {
+   "name": "enabled",
+   "optional": true
+  },
+  {
+   "name": "commentsLocked",
+   "optional": true
+  },
+  {
+   "name": "chatsLocked",
+   "optional": true
+  },
+  {
+   "name": "maxContentRating",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.PatchMeNanotagDTO": [
+  {
+   "name": "colorPreset",
+   "optional": false
+  },
+  {
+   "name": "chaosPercentage",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.PatchMeRequestDTO": [
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.SetDateOfBirthRequestDTO": [
+  {
+   "name": "dateOfBirth",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.TokenPairDTO": [
+  {
+   "name": "accessToken",
+   "optional": false
+  },
+  {
+   "name": "refreshToken",
+   "optional": false
+  },
+  {
+   "name": "userId",
+   "optional": false
+  },
+  {
+   "name": "emailVerified",
+   "optional": true
+  },
+  {
+   "name": "newUser",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.auth.data.model.UpdateAgeRequestDTO": [
+  {
+   "name": "ageRange",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.BlockRowDTO": [
+  {
+   "name": "user",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.BlockUserRequestDTO": [
+  {
+   "name": "userId",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ChatDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "kind",
+   "optional": true
+  },
+  {
+   "name": "inbox",
+   "optional": true
+  },
+  {
+   "name": "otherUser",
+   "optional": true
+  },
+  {
+   "name": "lastMessage",
+   "optional": true
+  },
+  {
+   "name": "unreadCount",
+   "optional": true
+  },
+  {
+   "name": "promotedAt",
+   "optional": true
+  },
+  {
+   "name": "lastMessageAt",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ChatGameCreatorDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ChatGameDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": true
+  },
+  {
+   "name": "creator",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ChatMessageDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "chatId",
+   "optional": true
+  },
+  {
+   "name": "senderId",
+   "optional": true
+  },
+  {
+   "name": "text",
+   "optional": true
+  },
+  {
+   "name": "game",
+   "optional": true
+  },
+  {
+   "name": "gameUnavailable",
+   "optional": true
+  },
+  {
+   "name": "replyTo",
+   "optional": true
+  },
+  {
+   "name": "clientNonce",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ChatNanotagDTO": [
+  {
+   "name": "source",
+   "optional": true
+  },
+  {
+   "name": "colorPreset",
+   "optional": true
+  },
+  {
+   "name": "chaosPercentage",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ChatOkResponseDTO": [
+  {
+   "name": "ok",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ChatReplyDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "senderId",
+   "optional": true
+  },
+  {
+   "name": "text",
+   "optional": true
+  },
+  {
+   "name": "gameId",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ChatSearchResponseDTO": [
+  {
+   "name": "friends",
+   "optional": true
+  },
+  {
+   "name": "suggestions",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ChatUserDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.CreateChatRequestDTO": [
+  {
+   "name": "recipientId",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ListBlocksResponseDTO": [
+  {
+   "name": "blocks",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ListChatMessagesResponseDTO": [
+  {
+   "name": "messages",
+   "optional": true
+  },
+  {
+   "name": "cursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ListChatsResponseDTO": [
+  {
+   "name": "chats",
+   "optional": true
+  },
+  {
+   "name": "cursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.MarkChatReadRequestDTO": [
+  {
+   "name": "messageId",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.ReportChatRequestDTO": [
+  {
+   "name": "reason",
+   "optional": false
+  },
+  {
+   "name": "details",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.chat.data.model.SendChatMessageRequestDTO": [
+  {
+   "name": "text",
+   "optional": true
+  },
+  {
+   "name": "gameId",
+   "optional": true
+  },
+  {
+   "name": "replyToId",
+   "optional": true
+  },
+  {
+   "name": "clientNonce",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.comment.data.giphy.GiphyGifDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "images",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.giphy.GiphyImagesDTO": [
+  {
+   "name": "fixed_width",
+   "optional": true
+  },
+  {
+   "name": "fixed_width_small",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.giphy.GiphyRenditionDTO": [
+  {
+   "name": "url",
+   "optional": true
+  },
+  {
+   "name": "webp",
+   "optional": true
+  },
+  {
+   "name": "width",
+   "optional": true
+  },
+  {
+   "name": "height",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.giphy.GiphyResponseDTO": [
+  {
+   "name": "data",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.model.CommentAuthorDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.model.CommentLikeV2ResponseDTO": [
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "likesCount",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.model.CommentListV2ResponseDTO": [
+  {
+   "name": "comments",
+   "optional": true
+  },
+  {
+   "name": "total",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.model.CommentRepliesV2ResponseDTO": [
+  {
+   "name": "replies",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.model.CommentV2DTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "author",
+   "optional": true
+  },
+  {
+   "name": "body",
+   "optional": true
+  },
+  {
+   "name": "giphyId",
+   "optional": true
+  },
+  {
+   "name": "giphyUrl",
+   "optional": true
+  },
+  {
+   "name": "likesCount",
+   "optional": true
+  },
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  },
+  {
+   "name": "parentId",
+   "optional": true
+  },
+  {
+   "name": "replies",
+   "optional": true
+  },
+  {
+   "name": "repliesCount",
+   "optional": true
+  },
+  {
+   "name": "repliesNextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.model.CreateCommentRequestDTO": [
+  {
+   "name": "body",
+   "optional": true
+  },
+  {
+   "name": "parentId",
+   "optional": true
+  },
+  {
+   "name": "giphyId",
+   "optional": true
+  },
+  {
+   "name": "giphyUrl",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.model.CreateCommentResponseDTO": [
+  {
+   "name": "comment",
+   "optional": true
+  },
+  {
+   "name": "commentsCount",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.model.DeleteCommentResponseDTO": [
+  {
+   "name": "code",
+   "optional": true
+  },
+  {
+   "name": "commentsCount",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.comment.data.model.ReportCommentRequestDTO": [
+  {
+   "name": "reason",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.analytics.data.AnalyticsBatchDTO": [
+  {
+   "name": "events",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.analytics.data.AnalyticsEventDTO": [
+  {
+   "name": "event_name",
+   "optional": false
+  },
+  {
+   "name": "payload",
+   "optional": true
+  },
+  {
+   "name": "client_ts",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.analytics.data.PersistEnvelope": [
+  {
+   "name": "v",
+   "optional": false
+  },
+  {
+   "name": "events",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.analytics.data.QueuedAnalyticsEvent": [
+  {
+   "name": "event_name",
+   "optional": false
+  },
+  {
+   "name": "payload",
+   "optional": true
+  },
+  {
+   "name": "client_ts",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.auth.CDNCookieManager.CookieResponse": [
+  {
+   "name": "expires_in",
+   "optional": true
+  },
+  {
+   "name": "expiresAt",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.config.ClientConfig": [
+  {
+   "name": "discordClientId",
+   "optional": true
+  },
+  {
+   "name": "discordRedirectUri",
+   "optional": true
+  },
+  {
+   "name": "discordInviteUrl",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.credits.data.AchievementDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "reward",
+   "optional": true
+  },
+  {
+   "name": "repeatability",
+   "optional": true
+  },
+  {
+   "name": "progress",
+   "optional": true
+  },
+  {
+   "name": "target",
+   "optional": true
+  },
+  {
+   "name": "completed",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.credits.data.CreditTransactionDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "delta",
+   "optional": true
+  },
+  {
+   "name": "kind",
+   "optional": true
+  },
+  {
+   "name": "description",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  },
+  {
+   "name": "bucket",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.credits.data.CreditTransactionsResponseDTO": [
+  {
+   "name": "transactions",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.credits.data.CreditsDTO": [
+  {
+   "name": "usedToday",
+   "optional": true
+  },
+  {
+   "name": "allowedToday",
+   "optional": true
+  },
+  {
+   "name": "remainingToday",
+   "optional": true
+  },
+  {
+   "name": "bankBalance",
+   "optional": true
+  },
+  {
+   "name": "resetsAt",
+   "optional": true
+  },
+  {
+   "name": "inFlight",
+   "optional": true
+  },
+  {
+   "name": "shareClicksToday",
+   "optional": true
+  },
+  {
+   "name": "shareClicksDailyMax",
+   "optional": true
+  },
+  {
+   "name": "tenLikesToday",
+   "optional": true
+  },
+  {
+   "name": "tenLikesDailyMax",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.credits.data.MeAchievementsResponseDTO": [
+  {
+   "name": "achievements",
+   "optional": true
+  },
+  {
+   "name": "dailyResetsAt",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.feedback.data.FeedbackRequestDTO": [
+  {
+   "name": "feedback",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.follow.data.FollowResponse": [
+  {
+   "name": "isFollowing",
+   "optional": true
+  },
+  {
+   "name": "followersCount",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.friends.data.FriendUserDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.friends.data.FriendsResponseDTO": [
+  {
+   "name": "users",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.invite.data.InviteDTO": [
+  {
+   "name": "inviterUsername",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.AvatarCropRoute": [
+  {
+   "name": "imageUri",
+   "optional": false
+  },
+  {
+   "name": "source",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.ChatThreadRoute": [
+  {
+   "name": "chatId",
+   "optional": false
+  },
+  {
+   "name": "otherUserId",
+   "optional": false
+  },
+  {
+   "name": "otherUsername",
+   "optional": false
+  },
+  {
+   "name": "otherAvatarUrl",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.DiscordAuthRoute": [
+  {
+   "name": "clientId",
+   "optional": false
+  },
+  {
+   "name": "redirectUri",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.DiscoverGamesListRoute": [
+  {
+   "name": "genreId",
+   "optional": true
+  },
+  {
+   "name": "sectionKey",
+   "optional": true
+  },
+  {
+   "name": "title",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.FollowListRoute": [
+  {
+   "name": "userId",
+   "optional": false
+  },
+  {
+   "name": "mode",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.GameDeepLinkRoute": [
+  {
+   "name": "gameId",
+   "optional": false
+  },
+  {
+   "name": "source",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.LeaderboardFeedRoute": [
+  {
+   "name": "sourceKey",
+   "optional": false
+  },
+  {
+   "name": "startGameId",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.NanotagEditRoute": [
+  {
+   "name": "username",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.NewGameRoute": [
+  {
+   "name": "prefillDescription",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.ProfileFeedRoute": [
+  {
+   "name": "tab",
+   "optional": false
+  },
+  {
+   "name": "startGameId",
+   "optional": false
+  },
+  {
+   "name": "source",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.PromptBreakdownRoute": [
+  {
+   "name": "input",
+   "optional": false
+  },
+  {
+   "name": "characterValue",
+   "optional": false
+  },
+  {
+   "name": "characterSuggestion",
+   "optional": false
+  },
+  {
+   "name": "actionValue",
+   "optional": false
+  },
+  {
+   "name": "actionSuggestion",
+   "optional": false
+  },
+  {
+   "name": "goalValue",
+   "optional": false
+  },
+  {
+   "name": "goalSuggestion",
+   "optional": false
+  },
+  {
+   "name": "aestheticsValue",
+   "optional": false
+  },
+  {
+   "name": "aestheticsSuggestion",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.PublicProfileRoute": [
+  {
+   "name": "userId",
+   "optional": false
+  },
+  {
+   "name": "source",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.RemixChatRoute": [
+  {
+   "name": "resumeSessionId",
+   "optional": true
+  },
+  {
+   "name": "remixedFromGameId",
+   "optional": true
+  },
+  {
+   "name": "remixedFromTitle",
+   "optional": true
+  },
+  {
+   "name": "initialTab",
+   "optional": true
+  },
+  {
+   "name": "initialPrompt",
+   "optional": true
+  },
+  {
+   "name": "openFullScreenOnReady",
+   "optional": true
+  },
+  {
+   "name": "resumePublished",
+   "optional": true
+  },
+  {
+   "name": "pendingStyleId",
+   "optional": true
+  },
+  {
+   "name": "pendingDimension",
+   "optional": true
+  },
+  {
+   "name": "pendingStyleName",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.navigation.WebPageRoute": [
+  {
+   "name": "url",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.core.report.data.ReportResponse": [
+  {
+   "name": "code",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.core.version.VersionResponseDTO": [
+  {
+   "name": "version",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.create.data.model.PromptBreakdownRequestDTO": [
+  {
+   "name": "input",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.create.data.model.PromptBreakdownResponseDTO": [
+  {
+   "name": "values",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.create.data.model.PromptBreakdownValueDTO": [
+  {
+   "name": "key",
+   "optional": true
+  },
+  {
+   "name": "value",
+   "optional": true
+  },
+  {
+   "name": "suggestion",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.create.data.model.SessionSummaryDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "styleId",
+   "optional": true
+  },
+  {
+   "name": "firstMessage",
+   "optional": true
+  },
+  {
+   "name": "messageCount",
+   "optional": true
+  },
+  {
+   "name": "hasHtml",
+   "optional": true
+  },
+  {
+   "name": "updatedAt",
+   "optional": true
+  },
+  {
+   "name": "publishedGameId",
+   "optional": true
+  },
+  {
+   "name": "publishedGameThumbnailUrl",
+   "optional": true
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.create.data.model.SessionsResponseDTO": [
+  {
+   "name": "sessions",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.create.data.model.StyleDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "name",
+   "optional": true
+  },
+  {
+   "name": "description",
+   "optional": true
+  },
+  {
+   "name": "dimension",
+   "optional": true
+  },
+  {
+   "name": "screenshotUrl",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.create.data.model.StylesResponseDTO": [
+  {
+   "name": "styles",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.DiscoverSectionCountsDTO": [
+  {
+   "name": "likes",
+   "optional": true
+  },
+  {
+   "name": "comments",
+   "optional": true
+  },
+  {
+   "name": "shares",
+   "optional": true
+  },
+  {
+   "name": "saves",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.DiscoverSectionCreatorDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "bio",
+   "optional": true
+  },
+  {
+   "name": "followersCount",
+   "optional": true
+  },
+  {
+   "name": "followingCount",
+   "optional": true
+  },
+  {
+   "name": "gamesCount",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.DiscoverSectionDTO": [
+  {
+   "name": "key",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "games",
+   "optional": true
+  },
+  {
+   "name": "genres",
+   "optional": true
+  },
+  {
+   "name": "creators",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.DiscoverSectionGameCreatorDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "isFollowing",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.DiscoverSectionGameDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "gameUrl",
+   "optional": true
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  },
+  {
+   "name": "ageRating",
+   "optional": true
+  },
+  {
+   "name": "genres",
+   "optional": true
+  },
+  {
+   "name": "counts",
+   "optional": true
+  },
+  {
+   "name": "creator",
+   "optional": true
+  },
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "isShared",
+   "optional": true
+  },
+  {
+   "name": "isSaved",
+   "optional": true
+  },
+  {
+   "name": "remixCount",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.DiscoverSectionGenreDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "description",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.DiscoverSectionsResponseDTO": [
+  {
+   "name": "gamesCreatedThisWeek",
+   "optional": true
+  },
+  {
+   "name": "sections",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.GameCountsDTO": [
+  {
+   "name": "likes",
+   "optional": true
+  },
+  {
+   "name": "shares",
+   "optional": true
+  },
+  {
+   "name": "comments",
+   "optional": true
+  },
+  {
+   "name": "saves",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.GameSearchV2ResponseDTO": [
+  {
+   "name": "games",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.GenreGamesResponseDTO": [
+  {
+   "name": "games",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.LeaderboardEntryDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": false
+  },
+  {
+   "name": "creatorId",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": false
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "gameUrl",
+   "optional": true
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": true
+  },
+  {
+   "name": "likes",
+   "optional": true
+  },
+  {
+   "name": "shares",
+   "optional": true
+  },
+  {
+   "name": "comments",
+   "optional": true
+  },
+  {
+   "name": "saves",
+   "optional": true
+  },
+  {
+   "name": "genres",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  },
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "isShared",
+   "optional": true
+  },
+  {
+   "name": "isSaved",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.LeaderboardItemDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": false
+  },
+  {
+   "name": "creatorId",
+   "optional": false
+  },
+  {
+   "name": "username",
+   "optional": false
+  },
+  {
+   "name": "avatarUrl",
+   "optional": false
+  },
+  {
+   "name": "gameUrl",
+   "optional": false
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": false
+  },
+  {
+   "name": "likes",
+   "optional": false
+  },
+  {
+   "name": "comments",
+   "optional": false
+  },
+  {
+   "name": "shares",
+   "optional": false
+  },
+  {
+   "name": "saves",
+   "optional": false
+  },
+  {
+   "name": "nanotagColorPreset",
+   "optional": true
+  },
+  {
+   "name": "nanotagChaos",
+   "optional": true
+  },
+  {
+   "name": "genres",
+   "optional": true
+  },
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "isShared",
+   "optional": true
+  },
+  {
+   "name": "isSaved",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.LeaderboardResponseDTO": [
+  {
+   "name": "daily",
+   "optional": true
+  },
+  {
+   "name": "weekly",
+   "optional": true
+  },
+  {
+   "name": "alltime",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.NanotagDTO": [
+  {
+   "name": "source",
+   "optional": true
+  },
+  {
+   "name": "colorPreset",
+   "optional": true
+  },
+  {
+   "name": "chaosPercentage",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.SearchGameCreatorDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.SearchGameV2DTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "gameUrl",
+   "optional": true
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  },
+  {
+   "name": "counts",
+   "optional": true
+  },
+  {
+   "name": "ageRating",
+   "optional": true
+  },
+  {
+   "name": "genres",
+   "optional": true
+  },
+  {
+   "name": "creator",
+   "optional": true
+  },
+  {
+   "name": "isSaved",
+   "optional": true
+  },
+  {
+   "name": "viewer",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.SearchUserV2DTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "followersCount",
+   "optional": true
+  },
+  {
+   "name": "gamesCount",
+   "optional": true
+  },
+  {
+   "name": "isFollowing",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.SearchViewerStateDTO": [
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "isShared",
+   "optional": true
+  },
+  {
+   "name": "isSaved",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.discover.data.model.UserSearchV2ResponseDTO": [
+  {
+   "name": "users",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.genres.data.model.GenreDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.genres.data.model.MyGenresResponseDTO": [
+  {
+   "name": "genreIds",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.genres.data.model.SetGenresRequestDTO": [
+  {
+   "name": "genreIds",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.home.data.cache.CachedGame": [
+  {
+   "name": "game",
+   "optional": false
+  },
+  {
+   "name": "fetchedAtMs",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.home.data.cache.RecentGame": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": false
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "genre",
+   "optional": true
+  },
+  {
+   "name": "likes",
+   "optional": true
+  },
+  {
+   "name": "recordedAt",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.data.cache.SeenGameDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": false
+  },
+  {
+   "name": "creatorId",
+   "optional": false
+  },
+  {
+   "name": "username",
+   "optional": false
+  },
+  {
+   "name": "avatarUrl",
+   "optional": false
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": false
+  },
+  {
+   "name": "description",
+   "optional": false
+  },
+  {
+   "name": "gameUrl",
+   "optional": false
+  },
+  {
+   "name": "ageRating",
+   "optional": false
+  },
+  {
+   "name": "totalLikes",
+   "optional": false
+  },
+  {
+   "name": "totalShares",
+   "optional": false
+  },
+  {
+   "name": "totalComments",
+   "optional": false
+  },
+  {
+   "name": "totalSaves",
+   "optional": false
+  },
+  {
+   "name": "isLikedByUser",
+   "optional": false
+  },
+  {
+   "name": "isSharedByUser",
+   "optional": false
+  },
+  {
+   "name": "isSavedByUser",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.FeedAPIResponse": [
+  {
+   "name": "games",
+   "optional": true
+  },
+  {
+   "name": "error",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.GameFeedItemDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": false
+  },
+  {
+   "name": "creatorId",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": false
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "gameUrl",
+   "optional": true
+  },
+  {
+   "name": "likes",
+   "optional": true
+  },
+  {
+   "name": "shares",
+   "optional": true
+  },
+  {
+   "name": "comments",
+   "optional": true
+  },
+  {
+   "name": "saves",
+   "optional": true
+  },
+  {
+   "name": "ageRating",
+   "optional": true
+  },
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "isShared",
+   "optional": true
+  },
+  {
+   "name": "isSaved",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.GameStatsResponse": [
+  {
+   "name": "likes",
+   "optional": true
+  },
+  {
+   "name": "shares",
+   "optional": true
+  },
+  {
+   "name": "comments",
+   "optional": true
+  },
+  {
+   "name": "saves",
+   "optional": true
+  },
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "isShared",
+   "optional": true
+  },
+  {
+   "name": "isSaved",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.GameV2CountsDTO": [
+  {
+   "name": "likes",
+   "optional": true
+  },
+  {
+   "name": "shares",
+   "optional": true
+  },
+  {
+   "name": "comments",
+   "optional": true
+  },
+  {
+   "name": "saves",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.GameV2CreatorDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  },
+  {
+   "name": "isFollowing",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.GameV2ResponseDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "gameUrl",
+   "optional": true
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  },
+  {
+   "name": "counts",
+   "optional": true
+  },
+  {
+   "name": "ageRating",
+   "optional": true
+  },
+  {
+   "name": "genres",
+   "optional": true
+  },
+  {
+   "name": "creator",
+   "optional": true
+  },
+  {
+   "name": "review",
+   "optional": true
+  },
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "isShared",
+   "optional": true
+  },
+  {
+   "name": "isSaved",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.GameV2ReviewDTO": [
+  {
+   "name": "status",
+   "optional": true
+  },
+  {
+   "name": "reason",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.LikeV2ResponseDTO": [
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "likesCount",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.SaveV2ResponseDTO": [
+  {
+   "name": "isSaved",
+   "optional": true
+  },
+  {
+   "name": "savesCount",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.ShareClickV2RequestDTO": [
+  {
+   "name": "sharerCode",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.home.data.model.ShareV2ResponseDTO": [
+  {
+   "name": "isShared",
+   "optional": true
+  },
+  {
+   "name": "sharesCount",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.ui.runtime.BridgeMessage": [
+  {
+   "name": "version",
+   "optional": false
+  },
+  {
+   "name": "sessionId",
+   "optional": false
+  },
+  {
+   "name": "gameId",
+   "optional": false
+  },
+  {
+   "name": "requestId",
+   "optional": true
+  },
+  {
+   "name": "type",
+   "optional": false
+  },
+  {
+   "name": "payload",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.home.ui.runtime.NativeCommand": [
+  {
+   "name": "version",
+   "optional": true
+  },
+  {
+   "name": "sessionId",
+   "optional": false
+  },
+  {
+   "name": "gameId",
+   "optional": false
+  },
+  {
+   "name": "type",
+   "optional": false
+  },
+  {
+   "name": "payload",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.notifications.data.model.MarkReadRequestDTO": [
+  {
+   "name": "notificationId",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.notifications.data.model.NotificationActorDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.notifications.data.model.NotificationGameDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.notifications.data.model.NotificationItemDTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "eventType",
+   "optional": true
+  },
+  {
+   "name": "gameId",
+   "optional": true
+  },
+  {
+   "name": "commentId",
+   "optional": true
+  },
+  {
+   "name": "actors",
+   "optional": true
+  },
+  {
+   "name": "actorCount",
+   "optional": true
+  },
+  {
+   "name": "preview",
+   "optional": true
+  },
+  {
+   "name": "game",
+   "optional": true
+  },
+  {
+   "name": "read",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  },
+  {
+   "name": "updatedAt",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.notifications.data.model.NotificationNanotagDTO": [
+  {
+   "name": "source",
+   "optional": true
+  },
+  {
+   "name": "colorPreset",
+   "optional": true
+  },
+  {
+   "name": "chaosPercentage",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.notifications.data.model.NotificationsFeedResponseDTO": [
+  {
+   "name": "notifications",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  },
+  {
+   "name": "unreadCount",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.notifications.data.model.UnreadCountResponseDTO": [
+  {
+   "name": "count",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.FollowListResponseDTO": [
+  {
+   "name": "users",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.FollowUserDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "isFollowing",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.MeGameCountsV2DTO": [
+  {
+   "name": "likes",
+   "optional": true
+  },
+  {
+   "name": "shares",
+   "optional": true
+  },
+  {
+   "name": "comments",
+   "optional": true
+  },
+  {
+   "name": "saves",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.MeGameCreatorV2DTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.MeGameReviewV2DTO": [
+  {
+   "name": "status",
+   "optional": true
+  },
+  {
+   "name": "reason",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.MeGameV2DTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "gameUrl",
+   "optional": true
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  },
+  {
+   "name": "counts",
+   "optional": true
+  },
+  {
+   "name": "ageRating",
+   "optional": true
+  },
+  {
+   "name": "creator",
+   "optional": true
+  },
+  {
+   "name": "review",
+   "optional": true
+  },
+  {
+   "name": "isLiked",
+   "optional": true
+  },
+  {
+   "name": "isShared",
+   "optional": true
+  },
+  {
+   "name": "isSaved",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.MeGamesV2ResponseDTO": [
+  {
+   "name": "games",
+   "optional": true
+  },
+  {
+   "name": "nextCursor",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.RenameGameRequest": [
+  {
+   "name": "title",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.ReportUserRequestDTO": [
+  {
+   "name": "reason",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.ReportUserResponseDTO": [
+  {
+   "name": "code",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.UserInfoV2DTO": [
+  {
+   "name": "id",
+   "optional": true
+  },
+  {
+   "name": "username",
+   "optional": true
+  },
+  {
+   "name": "avatarUrl",
+   "optional": true
+  },
+  {
+   "name": "nanotag",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.profile.data.model.UserProfileV2ResponseDTO": [
+  {
+   "name": "user",
+   "optional": true
+  },
+  {
+   "name": "bio",
+   "optional": true
+  },
+  {
+   "name": "followersCount",
+   "optional": true
+  },
+  {
+   "name": "followingCount",
+   "optional": true
+  },
+  {
+   "name": "stats",
+   "optional": true
+  },
+  {
+   "name": "isFollowing",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.CreateSessionRequest": [
+  {
+   "name": "styleId",
+   "optional": false
+  },
+  {
+   "name": "dimension",
+   "optional": true
+  },
+  {
+   "name": "description",
+   "optional": true
+  },
+  {
+   "name": "remixHtml",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.CreateSessionResponse": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "styleId",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.InFlightResponse": [
+  {
+   "name": "state",
+   "optional": true
+  },
+  {
+   "name": "inFlight",
+   "optional": true
+  },
+  {
+   "name": "sessionId",
+   "optional": true
+  },
+  {
+   "name": "messageId",
+   "optional": true
+  },
+  {
+   "name": "styleId",
+   "optional": true
+  },
+  {
+   "name": "styleName",
+   "optional": true
+  },
+  {
+   "name": "since",
+   "optional": true
+  },
+  {
+   "name": "questionText",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.MessageDTO": [
+  {
+   "name": "id",
+   "optional": false
+  },
+  {
+   "name": "sessionId",
+   "optional": true
+  },
+  {
+   "name": "role",
+   "optional": true
+  },
+  {
+   "name": "content",
+   "optional": true
+  },
+  {
+   "name": "status",
+   "optional": true
+  },
+  {
+   "name": "createdAt",
+   "optional": true
+  },
+  {
+   "name": "htmlSnapshot",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.MessagesResponse": [
+  {
+   "name": "messages",
+   "optional": true
+  },
+  {
+   "name": "remixHtml",
+   "optional": true
+  },
+  {
+   "name": "title",
+   "optional": true
+  },
+  {
+   "name": "thumbnailUrl",
+   "optional": true
+  },
+  {
+   "name": "thumbnailKind",
+   "optional": true
+  },
+  {
+   "name": "thumbnailRegensLeft",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.PublishRequest": [
+  {
+   "name": "title",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.PublishResponseDTO": [
+  {
+   "name": "gameId",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.RegenerateThumbnailRequest": [
+  {
+   "name": "title",
+   "optional": false
+  },
+  {
+   "name": "description",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.RegenerateThumbnailResponseDTO": [
+  {
+   "name": "code",
+   "optional": true
+  },
+  {
+   "name": "thumbnailRegensLeft",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.RevertRequest": [
+  {
+   "name": "messageId",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.SendMessageRequest": [
+  {
+   "name": "text",
+   "optional": false
+  },
+  {
+   "name": "supportsAskUser",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.remix.data.model.SendMessageResponseDTO": [
+  {
+   "name": "userMessage",
+   "optional": false
+  },
+  {
+   "name": "assistantMessage",
+   "optional": false
+  },
+  {
+   "name": "firstBuild",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.settings.data.model.DeleteDeviceTokenRequestDTO": [
+  {
+   "name": "token",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.settings.data.model.DeviceTokenRequestDTO": [
+  {
+   "name": "token",
+   "optional": false
+  },
+  {
+   "name": "platform",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.settings.data.model.DisableParentalControlsRequestDTO": [
+  {
+   "name": "currentPin",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.settings.data.model.EnableParentalControlsRequestDTO": [
+  {
+   "name": "pin",
+   "optional": false
+  },
+  {
+   "name": "commentsLocked",
+   "optional": false
+  },
+  {
+   "name": "chatsLocked",
+   "optional": false
+  },
+  {
+   "name": "maxContentRating",
+   "optional": true
+  }
+ ],
+ "app.nanogram.alpha.settings.data.model.NotificationPrefsDTO": [
+  {
+   "name": "pushEnabled",
+   "optional": false
+  },
+  {
+   "name": "likesEnabled",
+   "optional": false
+  },
+  {
+   "name": "commentsEnabled",
+   "optional": false
+  },
+  {
+   "name": "savesEnabled",
+   "optional": false
+  },
+  {
+   "name": "followsEnabled",
+   "optional": false
+  },
+  {
+   "name": "mentionsEnabled",
+   "optional": false
+  }
+ ],
+ "app.nanogram.alpha.settings.data.model.VerifyParentalPinResetRequestDTO": [
+  {
+   "name": "code",
+   "optional": false
+  },
+  {
+   "name": "newPin",
+   "optional": false
+  }
+ ],
+ "com.google.firebase.sessions.ProcessData": [
+  {
+   "name": "pid",
+   "optional": false
+  },
+  {
+   "name": "uuid",
+   "optional": false
+  }
+ ],
+ "com.google.firebase.sessions.SessionData": [
+  {
+   "name": "sessionDetails",
+   "optional": false
+  },
+  {
+   "name": "backgroundTime",
+   "optional": true
+  },
+  {
+   "name": "processDataMap",
+   "optional": true
+  }
+ ],
+ "com.google.firebase.sessions.SessionDetails": [
+  {
+   "name": "sessionId",
+   "optional": false
+  },
+  {
+   "name": "firstSessionId",
+   "optional": false
+  },
+  {
+   "name": "sessionIndex",
+   "optional": false
+  },
+  {
+   "name": "sessionStartTimestampUs",
+   "optional": false
+  }
+ ],
+ "com.google.firebase.sessions.Time": [
+  {
+   "name": "ms",
+   "optional": false
+  },
+  {
+   "name": "us",
+   "optional": true
+  },
+  {
+   "name": "seconds",
+   "optional": true
+  }
+ ],
+ "com.google.firebase.sessions.settings.SessionConfigs": [
+  {
+   "name": "sessionsEnabled",
+   "optional": false
+  },
+  {
+   "name": "sessionSamplingRate",
+   "optional": false
+  },
+  {
+   "name": "sessionTimeoutSeconds",
+   "optional": false
+  },
+  {
+   "name": "cacheDurationSeconds",
+   "optional": false
+  },
+  {
+   "name": "cacheUpdatedTimeSeconds",
+   "optional": false
+  }
+ ]
+}
