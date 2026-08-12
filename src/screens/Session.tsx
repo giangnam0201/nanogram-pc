@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { gamegen } from '../lib/api';
 import { errorMessage, ipc } from '../lib/ipc';
 import { t } from '../lib/i18n';
+import { parseAssistant } from '../lib/gamegen';
 import { back, navigate, toast } from '../lib/store';
 import { Button, FullSpinner, Sheet, Spinner } from '../components/common';
 import { Icon } from '../components/Icon';
@@ -60,8 +61,8 @@ export function SessionScreen({ sessionId }: { sessionId: string }) {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
   }, [data?.messages?.length]);
 
-  async function send() {
-    const text = draft.trim();
+  async function send(explicit?: string) {
+    const text = (explicit ?? draft).trim();
     if (!text || sending) return;
     setSending(true);
     try {
@@ -166,20 +167,45 @@ export function SessionScreen({ sessionId }: { sessionId: string }) {
       >
         <div class="chat" style={{ gridTemplateRows: '1fr auto', borderRight: '1px solid var(--line)' }}>
           <div class="chat-log" ref={logRef}>
-            {data.messages?.map((m) => (
-              <div key={m.id} class={`bubble ${m.role === 'user' ? 'bubble-out' : 'bubble-in'}`}>
-                {m.content}
-                {m.role !== 'user' && m.htmlSnapshot && (
-                  <button
-                    class="small muted"
-                    style={{ display: 'block', marginTop: 6 }}
-                    onClick={() => void revert(m)}
-                  >
-                    <Icon name="ic_undo_arrow" size={12} /> Revert to here
-                  </button>
-                )}
-              </div>
-            ))}
+            {data.messages?.map((m, index) => {
+              const isUser = m.role === 'user';
+              const parsed = isUser ? null : parseAssistant(m.content);
+              // Only the newest question is still answerable.
+              const isLast = index === (data.messages?.length ?? 0) - 1;
+              const options = isLast && !building ? (parsed?.options ?? []) : [];
+
+              return (
+                <div key={m.id} class="msg-group">
+                  <div class={`bubble ${isUser ? 'bubble-out' : 'bubble-in'}`}>
+                    {isUser ? m.content : parsed?.text}
+                    {!isUser && m.htmlSnapshot && (
+                      <button
+                        class="small muted"
+                        style={{ display: 'block', marginTop: 6 }}
+                        onClick={() => void revert(m)}
+                      >
+                        <Icon name="ic_undo_arrow" size={12} /> Revert to here
+                      </button>
+                    )}
+                  </div>
+
+                  {options.length > 0 && (
+                    <div class="choice-row">
+                      {options.map((option) => (
+                        <button
+                          key={option}
+                          class="choice"
+                          disabled={sending}
+                          onClick={() => void send(option)}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
             {building && (
               <div class="bubble bubble-in">
                 <span class="hstack">
