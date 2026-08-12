@@ -37,7 +37,16 @@ jobs:
 
       - name: Package artifact
         shell: pwsh
-        run: Compress-Archive -Path build/compose/binaries/main/* -DestinationPath nanogram-pc-windows.zip
+        run: |
+          Get-ChildItem -Path build/compose/binaries/main -Recurse -Depth 3 | Select-Object FullName, Length
+          echo "---"
+          if (Test-Path build/compose/binaries/main/app) {
+            Compress-Archive -Path build/compose/binaries/main/app -DestinationPath nanogram-pc-windows.zip
+          } elseif (Test-Path build/compose/binaries/main/exe) {
+            Compress-Archive -Path build/compose/binaries/main/exe -DestinationPath nanogram-pc-windows.zip
+          } else {
+            Compress-Archive -Path build/compose/binaries/main -DestinationPath nanogram-pc-windows.zip
+          }
 
       - uses: actions/upload-artifact@v4
         with:
