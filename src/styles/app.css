@@ -98,7 +98,7 @@
 }
 
 .nav-item.is-active {
-  color: var(--brand);
+  color: var(--ng-ink);
 }
 
 .nav-icon {
@@ -161,16 +161,17 @@
 }
 
 .btn-primary {
-  background: var(--brand);
-  color: var(--brand-ink);
+  background: var(--ng-ink);
+  color: var(--ng-bg);
 }
 .btn-primary:hover:not(:disabled) {
-  background: #d3f58e;
+  opacity: 0.86;
 }
 
 .btn-outline {
-  border: 1px solid var(--line-strong);
-  color: var(--text);
+  border: 1px solid var(--ng-separator);
+  color: var(--ng-ink);
+  background: var(--ng-bg);
 }
 .btn-outline:hover:not(:disabled) {
   background: var(--surface-2);
@@ -232,8 +233,8 @@
 
 .input:focus,
 .textarea:focus {
-  border-color: var(--brand);
-  background: var(--surface-3);
+  border-color: var(--ng-ink);
+  background: var(--ng-bg);
 }
 
 .textarea {
@@ -303,7 +304,7 @@
   border-radius: var(--r-xl);
   overflow: hidden;
   background: var(--surface);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  box-shadow: var(--ng-shadow-card);
 }
 
 .feed-stage iframe {
@@ -346,6 +347,7 @@
 }
 
 .feed-meta {
+  color: #fff;
   position: absolute;
   left: 0;
   right: 72px;
@@ -370,11 +372,12 @@
 .feed-username {
   font-weight: 700;
   font-size: 15px;
+  color: #fff;
 }
 
 .feed-game-title {
   font-size: 14px;
-  color: var(--text-2);
+  color: rgba(255, 255, 255, 0.85);
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -405,7 +408,7 @@
 }
 
 .rail-btn.is-on {
-  color: var(--brand);
+  color: var(--ng-red);
 }
 
 .rail-count {
@@ -445,9 +448,10 @@
 .card-thumb {
   position: relative;
   aspect-ratio: 3 / 4;
-  border-radius: var(--r-lg);
+  border-radius: var(--ng-r-lg);
   overflow: hidden;
-  background: var(--surface-2);
+  background: var(--ng-fill);
+  box-shadow: var(--ng-shadow-lift);
 }
 
 .card-thumb img {
@@ -555,7 +559,7 @@
 
 .tab.is-active {
   color: var(--text);
-  border-bottom-color: var(--brand);
+  border-bottom-color: var(--ng-ink);
 }
 
 .chips {
@@ -583,8 +587,8 @@
 }
 
 .chip.is-active {
-  background: var(--brand);
-  color: var(--brand-ink);
+  background: var(--ng-ink);
+  color: var(--ng-bg);
 }
 
 /* ------------------------------------------------------------ sheets --- */
@@ -664,13 +668,13 @@
 }
 
 .toast {
-  background: var(--elevated);
+  background: var(--ng-fill-strong);
   color: var(--text);
   padding: 11px 18px;
   border-radius: var(--r-full);
   font-size: 14px;
   font-weight: 500;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--ng-shadow-card);
   animation: rise 0.18s var(--ease);
 }
 
@@ -684,7 +688,7 @@
 .spinner {
   display: inline-block;
   border: 2px solid var(--line-strong);
-  border-top-color: var(--brand);
+  border-top-color: var(--ng-ink);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -729,8 +733,8 @@
 
 .bubble-out {
   align-self: flex-end;
-  background: var(--brand);
-  color: var(--brand-ink);
+  background: var(--ng-ink);
+  color: var(--ng-bg);
   border-bottom-right-radius: var(--r-sm);
 }
 
@@ -748,43 +752,59 @@
 .login {
   height: 100%;
   display: grid;
-  place-items: center;
-  padding: 32px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+  align-items: center;
+  gap: var(--ng-space-xxl);
+  padding: var(--ng-space-xl);
   overflow-y: auto;
+  background: var(--ng-bg);
+}
+
+/* Auth-only steps (email, code) centre the panel. */
+.login:has(.login-card:only-child) {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+
+@media (max-width: 900px) {
+  .login {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+  .welcome-art {
+    display: none;
+  }
 }
 
 .login-card {
   width: min(400px, 100%);
   display: grid;
-  gap: 14px;
+  gap: var(--ng-space-xs);
   justify-items: stretch;
   text-align: center;
+  justify-self: center;
 }
 
 .login-logo {
   justify-self: center;
-  color: var(--brand);
+  color: var(--ng-ink);
   margin-bottom: 6px;
 }
 
 .login-title {
-  font-size: 26px;
-  font-weight: 800;
   margin: 0;
-  letter-spacing: -0.02em;
 }
 
 .login-sub {
-  color: var(--text-3);
+  color: var(--ng-text-secondary);
   margin: 0 0 8px;
-  font-size: 14.5px;
 }
 
 .divider {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--text-4);
+  color: var(--ng-text-muted);
   font-size: 12px;
   margin: 4px 0;
 }
@@ -794,7 +814,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--line);
+  background: var(--ng-separator);
 }
 
 .otp-input {
@@ -802,6 +822,71 @@
   text-align: center;
   font-size: 22px;
   font-weight: 700;
+}
+
+/* ------------------------------------------------ welcome card deck --- */
+
+.welcome-art {
+  display: grid;
+  justify-items: center;
+  gap: var(--ng-space-m);
+  min-width: 0;
+}
+
+.welcome-deck {
+  position: relative;
+  width: min(360px, 100%);
+  aspect-ratio: 3 / 4;
+}
+
+.welcome-card {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  border-radius: var(--ng-r-xl);
+  overflow: hidden;
+  background: var(--ng-fill);
+  box-shadow: var(--ng-shadow-card);
+  transition: transform var(--ng-dur) var(--ng-ease), opacity var(--ng-dur) var(--ng-ease);
+  transform-origin: 50% 100%;
+}
+
+.welcome-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.welcome-card-label {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 6px 12px;
+  border-radius: var(--ng-r-pill);
+  background: var(--ng-glass-bg);
+  border: 1px solid var(--ng-glass-border);
+  backdrop-filter: blur(10px);
+  color: var(--ng-ink);
+}
+
+.welcome-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.welcome-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--ng-r-pill);
+  background: var(--ng-fill-strong);
+  transition: background var(--ng-dur-micro) var(--ng-ease), width var(--ng-dur) var(--ng-ease);
+}
+
+.welcome-dot.is-active {
+  width: 22px;
+  background: var(--ng-ink);
 }
 
 /* ----------------------------------------------------------- profile --- */

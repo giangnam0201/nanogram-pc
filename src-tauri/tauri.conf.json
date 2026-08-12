@@ -21,8 +21,8 @@
         "fullscreen": false,
         "center": true,
         "decorations": true,
-        "theme": "Dark",
-        "backgroundColor": "#0D0D0D",
+        "theme": "Light",
+        "backgroundColor": "#FFFFFF",
         "dragDropEnabled": true
       }
     ],

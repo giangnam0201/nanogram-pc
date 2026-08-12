@@ -5,6 +5,7 @@ import { apiErrorText, t } from '../lib/i18n';
 import { refreshSession, toast } from '../lib/store';
 import { Button, Spinner } from '../components/common';
 import { Icon } from '../components/Icon';
+import { WelcomeCards } from '../components/WelcomeCards';
 
 type Step = 'welcome' | 'email' | 'code';
 
@@ -86,13 +87,15 @@ export function LoginScreen() {
 
   return (
     <div class="login">
+      {step === 'welcome' && <WelcomeCards />}
+
       <div class="login-card">
-        <Icon name="ic_nano_logo" size={64} className="login-logo" />
+        <Icon name="ic_nano_logo" size={56} className="login-logo" />
 
         {step === 'welcome' && (
           <>
-            <h1 class="login-title">Nanogram</h1>
-            <p class="login-sub">Play, create and remix instant games.</p>
+            <h1 class="login-title ng-display-sm">Nanogram</h1>
+            <p class="login-sub ng-body-lg">TikTok, but for games.</p>
 
             <Button full onClick={() => setStep('email')} disabled={busy}>
               {t('welcome_continue_with_email')}
@@ -145,7 +148,7 @@ export function LoginScreen() {
               void sendCode();
             }}
           >
-            <h1 class="login-title">{t('auth_otp_email_title')}</h1>
+            <h1 class="login-title ng-title-xl">{t('auth_otp_email_title')}</h1>
             <p class="login-sub">{t('auth_otp_email_subtitle')}</p>
             <input
               class="input"
@@ -177,7 +180,7 @@ export function LoginScreen() {
               void verify();
             }}
           >
-            <h1 class="login-title">{t('auth_otp_code_title')}</h1>
+            <h1 class="login-title ng-title-xl">{t('auth_otp_code_title')}</h1>
             <p class="login-sub">{t('auth_otp_code_subtitle', email)}</p>
             <input
               ref={codeRef}

@@ -1,7 +1,10 @@
-/* Design tokens taken from the Nanogram Android build:
-   brand green #C4EE74, near-black surfaces, Mona Sans throughout.
-   The Android app forces night mode in attachBaseContext, so there is
-   deliberately only one theme here. */
+/* Nanogram design tokens.
+   Taken verbatim from the official system (the `--ng-*` custom properties
+   published on nanogram.app). Light is the default; dark is opt-in via
+   [data-ng-theme="dark"], exactly as the web app does it.
+
+   Do not invent colours here. Nanogram's palette has no green accent and no
+   dark default — earlier guesses at both were wrong. */
 
 @font-face {
   font-family: 'Mona Sans';
@@ -53,37 +56,121 @@
 }
 
 :root {
-  --brand: #c4ee74;
-  --brand-ink: #14210a;
-  --brand-dim: rgba(196, 238, 116, 0.14);
+  /* --- official palette (light) --- */
+  --ng-ink: #1a1a1a;
+  --ng-bg: #ffffff;
+  --ng-surface: #f5f5f5;
+  --ng-fill: #ededed;
+  --ng-fill-strong: #e5e5e5;
+  --ng-separator: #e5e5e5;
+  --ng-text-secondary: #666666;
+  --ng-text-muted: #999999;
+  --ng-disabled-bg: #e5e5e5;
+  --ng-disabled-text: #999999;
+  --ng-toggle-off: #cccccc;
 
-  --bg: #0d0d0d;
-  --surface: #1a1a1a;
-  --surface-2: #212121;
-  --surface-3: #2b2b2b;
-  --elevated: #333333;
+  --ng-yellow: #fcc745;
+  --ng-orange: #fe7950;
+  --ng-red: #ea5050;
+  --ng-pink: #ea72c4;
+  --ng-purple: #9c72ea;
+  --ng-blue: #72c6ea;
+  --ng-green: #5fb259;
 
-  --text: #ffffff;
-  --text-2: rgba(255, 255, 255, 0.72);
-  --text-3: rgba(255, 255, 255, 0.48);
-  --text-4: rgba(255, 255, 255, 0.32);
+  --ng-font: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  --line: rgba(255, 255, 255, 0.1);
-  --line-strong: rgba(255, 255, 255, 0.18);
+  --ng-r-sm: 8px;
+  --ng-r-md: 12px;
+  --ng-r-lg: 14px;
+  --ng-r-xl: 24px;
+  --ng-r-pill: 999px;
 
-  --danger: #ff5a5a;
-  --warn: #ffb84d;
+  --ng-space-xs: 12px;
+  --ng-space-s: 16px;
+  --ng-space-m: 20px;
+  --ng-space-l: 24px;
+  --ng-space-xl: 32px;
+  --ng-space-xxl: 40px;
+  --ng-margin: 24px;
 
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 18px;
-  --r-xl: 28px;
-  --r-full: 999px;
+  --ng-shadow-card: 0 20px 40px rgba(0, 0, 0, 0.1);
+  --ng-shadow-lift: 0 5px 5px rgba(0, 0, 0, 0.05);
+  --ng-shadow-hairline: 0 1px 1px rgba(0, 0, 0, 0.15);
+
+  --ng-glass-bg: rgba(255, 255, 255, 0.6);
+  --ng-glass-border: rgba(0, 0, 0, 0.08);
+
+  --ng-ease: cubic-bezier(0.5, 0, 0.58, 1);
+  --ng-ease-out: cubic-bezier(0, 0, 0.58, 1);
+  --ng-dur: 0.25s;
+  --ng-dur-micro: 0.1s;
+
+  --ng-rainbow-linear: linear-gradient(
+    180deg,
+    #45ccff 0%,
+    #2648cf 17%,
+    #e121ff 36%,
+    #ff2199 54%,
+    #ff4521 74%,
+    #ff8712 88%,
+    #ffde33 100%
+  );
+  --ng-rainbow-conic: conic-gradient(
+    from 0deg,
+    #45ccff 0%,
+    #2178ed 8%,
+    #082187 18%,
+    #05051a 30%,
+    #120833 42%,
+    #ff2199 50%,
+    #ff4521 58%,
+    #ff8712 65%,
+    #ffde33 72%,
+    #fff2ba 78%,
+    #66ccff 88%,
+    #45ccff 100%
+  );
+
+  /* --- app aliases, so components read semantically --- */
+  --bg: var(--ng-bg);
+  --surface: var(--ng-surface);
+  --surface-2: var(--ng-fill);
+  --surface-3: var(--ng-fill-strong);
+  --text: var(--ng-ink);
+  --text-2: var(--ng-text-secondary);
+  --text-3: var(--ng-text-muted);
+  --line: var(--ng-separator);
+  --line-strong: var(--ng-toggle-off);
+  --text-4: var(--ng-text-muted);
+  --danger: var(--ng-red);
+
+  --r-sm: var(--ng-r-sm);
+  --r-md: var(--ng-r-md);
+  --r-lg: var(--ng-r-lg);
+  --r-xl: var(--ng-r-xl);
+  --r-full: var(--ng-r-pill);
 
   --nav-h: 64px;
   --feed-w: 460px;
+  --ease: var(--ng-ease);
 
-  --ease: cubic-bezier(0.2, 0, 0, 1);
+  color-scheme: light;
+}
+
+[data-ng-theme='dark'] {
+  --ng-ink: #f5f5f5;
+  --ng-bg: #000000;
+  --ng-surface: #1c1c1e;
+  --ng-fill: #121212;
+  --ng-fill-strong: #333333;
+  --ng-separator: #1a1a1a;
+  --ng-text-secondary: #8a8a8a;
+  --ng-text-muted: #666666;
+  --ng-disabled-bg: #333333;
+  --ng-disabled-text: #666666;
+  --ng-toggle-off: #404040;
+  --ng-glass-bg: rgba(26, 26, 26, 0.6);
+  --ng-glass-border: rgba(255, 255, 255, 0.08);
 
   color-scheme: dark;
 }
@@ -101,13 +188,10 @@ body,
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Mona Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  font-size: 15px;
-  line-height: 1.4;
+  background: var(--ng-bg);
+  color: var(--ng-ink);
+  font: 400 14px/20px var(--ng-font);
   overflow: hidden;
-  /* Desktop chrome shouldn't feel like a document. */
   user-select: none;
   -webkit-user-select: none;
 }
@@ -133,18 +217,77 @@ a {
   text-decoration: none;
 }
 
+img,
+svg,
+video {
+  display: block;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+/* Official type scale. */
+.ng-display-lg {
+  font: 700 48px/52px var(--ng-font);
+  letter-spacing: -0.015em;
+}
+.ng-display-sm {
+  font: 700 32px/36px var(--ng-font);
+  letter-spacing: -0.01em;
+}
+.ng-title-xl {
+  font: 700 28px/32px var(--ng-font);
+  letter-spacing: -0.005em;
+}
+.ng-title-lg {
+  font: 700 24px/28px var(--ng-font);
+  letter-spacing: -0.005em;
+}
+.ng-title-md {
+  font: 700 20px/24px var(--ng-font);
+}
+.ng-title-sm {
+  font: 700 18px/22px var(--ng-font);
+}
+.ng-body-lg {
+  font: 400 16px/22px var(--ng-font);
+}
+.ng-body-md {
+  font: 400 14px/20px var(--ng-font);
+}
+.ng-body-sm {
+  font: 400 13px/20px var(--ng-font);
+}
+.ng-label-lg {
+  font: 500 16px/20px var(--ng-font);
+}
+.ng-label-md {
+  font: 500 14px/16px var(--ng-font);
+}
+.ng-label-sm {
+  font: 600 12px/16px var(--ng-font);
+}
+.ng-caption {
+  font: 400 12px/16px var(--ng-font);
+  color: var(--ng-text-muted);
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--surface-3);
-  border-radius: var(--r-full);
+  background: var(--ng-fill-strong);
+  border-radius: var(--ng-r-pill);
   border: 3px solid transparent;
   background-clip: content-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--elevated);
+  background: var(--ng-toggle-off);
   background-clip: content-box;
 }
 ::-webkit-scrollbar-track {
