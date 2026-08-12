@@ -12,7 +12,6 @@ import {
 } from './lib/store';
 import { notifications as notificationsApi } from './lib/api';
 import { isTauri } from './lib/transport';
-import { primeCdnSession } from './lib/transport.web';
 import { NavBar } from './components/NavBar';
 import { FullSpinner } from './components/common';
 import { HomeScreen } from './screens/Home';
@@ -81,8 +80,6 @@ function Toasts() {
 
 export function App() {
   useEffect(() => {
-    // The web build needs first-party media cookies before images load.
-    if (!isTauri) void primeCdnSession();
     void refreshSession();
     // Desktop OAuth completes in a separate window and signals back over IPC;
     // there is no such event (or IPC) in the browser.

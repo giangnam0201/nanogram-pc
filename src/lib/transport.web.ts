@@ -167,8 +167,24 @@ export const CDN_PROXY: string = (import.meta.env.VITE_CDN_PROXY ?? '/api').repl
  * and server logs — a first-party cookie avoids both.
  */
 export async function primeCdnSession(): Promise<void> {
-  const token = load().accessToken;
-  if (!token || !CDN_PROXY) return;
+  if (!CDN_PROXY) return;
+
+  let session = load();
+  if (!session.refreshToken) return;
+
+  // A stale access token would make the exchange 401 and leave media unsigned,
+  // so make sure it is current before handing it over.
+  if (accessExpired(session)) {
+    try {
+      await refresh();
+    } catch {
+      return;
+    }
+    session = load();
+  }
+
+  const token = session.accessToken;
+  if (!token) return;
   try {
     await fetch(`${CDN_PROXY}/cdn-session`, {
       method: 'POST',

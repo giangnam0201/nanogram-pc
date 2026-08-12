@@ -1,5 +1,7 @@
 import { signal, computed } from '@preact/signals';
 import { ipc } from './ipc';
+import { isTauri } from './transport';
+import { primeCdnSession } from './transport.web';
 import { profile } from './api';
 import type { Me } from './types';
 
@@ -57,6 +59,9 @@ export async function refreshSession() {
   loggedIn.value = state.loggedIn;
   if (state.loggedIn) {
     await loadMe();
+    // Browser media needs first-party CloudFront cookies; the desktop build
+    // signs requests in Rust instead.
+    if (!isTauri) void primeCdnSession();
   } else {
     me.value = null;
   }
