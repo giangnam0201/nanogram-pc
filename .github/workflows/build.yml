@@ -71,9 +71,6 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             name: macos-arm64
-          - os: macos-13
-            target: x86_64-apple-darwin
-            name: macos-x64
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             name: linux-x64
@@ -132,18 +129,60 @@ jobs:
           path: out/*
           if-no-files-found: error
 
+  # Every green build on the default branch republishes the rolling "latest"
+  # release, so the Releases tab always serves installers for the current
+  # commit. Tagged pushes additionally cut a permanent versioned release.
   release:
     needs: bundle
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push'
     runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - name: Publish release
+
+      - name: Flatten artifacts
+        shell: bash
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec cp {} release/ \;
+          ls -la release
+
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*
+          files: release/*
           generate_release_notes: true
+
+      # A rolling tag cannot be moved in place, so replace it outright.
+      - name: Reset rolling tag
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete latest --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
+
+      - name: Publish latest build
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          target_commitish: ${{ github.sha }}
+          name: Latest build
+          make_latest: true
+          files: release/*
+          body: |
+            Automatic build of `${{ github.sha }}`.
+
+            | Platform | File |
+            |----------|------|
+            | Windows 10/11 x64 | `.exe` installer or `.msi` |
+            | macOS (Apple Silicon) | `.dmg` |
+            | Linux x64 | `.deb` or `.AppImage` |
+
+            Windows needs the Edge WebView2 runtime (preinstalled on Windows 11
+            and Windows 10 21H2+). Linux needs `libwebkit2gtk-4.1`.
