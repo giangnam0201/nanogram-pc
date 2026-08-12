@@ -15,6 +15,8 @@ export function GameScreen({ gameId }: { gameId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  // Default to filling the pane; the phone frame is opt-in.
+  const [phoneSize, setPhoneSize] = useState(false);
   const url = useGameUrl(gameId, game?.gameUrl);
 
   async function load() {
@@ -87,17 +89,20 @@ export function GameScreen({ gameId }: { gameId: string }) {
           height: 'calc(100% - 66px)',
         }}
       >
-        <div style={{ background: '#000', display: 'grid', placeItems: 'center', position: 'relative' }}>
-          <div
-            style={{
-              position: 'relative',
-              height: '100%',
-              aspectRatio: '9 / 16',
-              maxWidth: '100%',
-            }}
+        <div
+          class={`player-stage${phoneSize ? ' is-portrait' : ''}`}
+          style={{ position: 'relative' }}
+        >
+          <GameFrame url={url} title={game.title} />
+          <button
+            class="icon-btn"
+            style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,.55)' }}
+            onClick={() => setPhoneSize(!phoneSize)}
+            aria-label={phoneSize ? 'Fill window' : 'Phone size'}
+            title={phoneSize ? 'Fill window' : 'Phone size'}
           >
-            <GameFrame url={url} title={game.title} />
-          </div>
+            <Icon name={phoneSize ? 'ic_maximize' : 'ic_streamline_landscape'} size={16} />
+          </button>
         </div>
 
         <aside class="screen-pad" style={{ overflowY: 'auto', borderLeft: '1px solid var(--line)' }}>

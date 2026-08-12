@@ -93,11 +93,14 @@ export function GamePlayer({
   onClose: () => void;
 }) {
   const url = useGameUrl(gameId, gameUrl);
-  const [portrait, setPortrait] = useState(true);
+  // Fill the window by default: most games size themselves to the viewport and
+  // look cramped or clipped inside a phone-shaped column on desktop.
+  const [portrait, setPortrait] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
+      if (e.key === 'f' || e.key === 'F') setPortrait((p) => !p);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -114,9 +117,10 @@ export function GamePlayer({
         <button
           class="icon-btn"
           onClick={() => setPortrait(!portrait)}
-          aria-label={portrait ? 'Fit width' : 'Phone size'}
+          aria-label={portrait ? 'Fill window (F)' : 'Phone size (F)'}
+          title={portrait ? 'Fill window (F)' : 'Phone size (F)'}
         >
-          <Icon name="ic_maximize" size={18} />
+          <Icon name={portrait ? 'ic_maximize' : 'ic_streamline_landscape'} size={18} />
         </button>
       </div>
       <div class={`player-stage${portrait ? ' is-portrait' : ''}`}>
