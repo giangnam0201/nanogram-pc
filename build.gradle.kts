@@ -19,13 +19,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
 
-    implementation("io.ktor:ktor-client-core:3.0.2")
-    implementation("io.ktor:ktor-client-cio:3.0.2")
-    implementation("io.ktor:ktor-client-content-negotiation:3.0.2")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.2")
-
-    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
-    implementation("io.coil-kt.coil3:coil-network-ktor2:3.0.4")
+    implementation("io.ktor:ktor-client-core:3.0.3")
+    implementation("io.ktor:ktor-client-cio:3.0.3")
+    implementation("io.ktor:ktor-client-content-negotiation:3.0.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.3")
 }
 
 compose.desktop {
@@ -41,15 +38,6 @@ compose.desktop {
                 iconFile.set(project.file("src/main/resources/icon.ico"))
                 menuGroup = "Nanogram"
                 upgradeUuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-            }
-
-            macOS {
-                iconFile.set(project.file("src/main/resources/icon.icns"))
-                bundleID = "app.nanogram.pc"
-            }
-
-            linux {
-                iconFile.set(project.file("src/main/resources/icon.png"))
             }
         }
     }
