@@ -3,14 +3,15 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "Nanogram for desktop — Windows, macOS, Linux",
+  "description": "Nanogram for desktop \u2014 Windows, macOS, Linux",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
     "app": "tauri dev",
-    "app:build": "tauri build"
+    "app:build": "tauri build",
+    "build:web": "tsc --noEmit && vite build --mode web"
   },
   "dependencies": {
     "@preact/signals": "^2.0.1",

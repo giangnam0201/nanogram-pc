@@ -6,6 +6,7 @@ import { refreshSession, toast } from '../lib/store';
 import { Button, Spinner } from '../components/common';
 import { Icon } from '../components/Icon';
 import { WelcomeCards } from '../components/WelcomeCards';
+import { isTauri } from '../lib/transport';
 
 type Step = 'welcome' | 'email' | 'code';
 
@@ -101,16 +102,22 @@ export function LoginScreen() {
               {t('welcome_continue_with_email')}
             </Button>
 
-            <div class="divider">or</div>
+            {/* Both providers pin their redirect URI to Nanogram's own
+                allowlist, which only the desktop build can satisfy. */}
+            {isTauri && (
+              <>
+                <div class="divider">or</div>
 
-            <Button full variant="outline" onClick={() => void oauth('google')} loading={busy}>
-              <Icon name="ic_google" size={18} />
-              {t('login_continue_with_google')}
-            </Button>
-            <Button full variant="outline" onClick={() => void oauth('discord')} disabled={busy}>
-              <Icon name="ic_discord" size={18} />
-              {t('login_continue_with_discord')}
-            </Button>
+                <Button full variant="outline" onClick={() => void oauth('google')} loading={busy}>
+                  <Icon name="ic_google" size={18} />
+                  {t('login_continue_with_google')}
+                </Button>
+                <Button full variant="outline" onClick={() => void oauth('discord')} disabled={busy}>
+                  <Icon name="ic_discord" size={18} />
+                  {t('login_continue_with_discord')}
+                </Button>
+              </>
+            )}
 
             {error && <p class="field-error">{error}</p>}
 

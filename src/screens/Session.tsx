@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { gamegen } from '../lib/api';
 import { errorMessage, ipc } from '../lib/ipc';
 import { t } from '../lib/i18n';
-import { previewUrl } from '../lib/cdn';
 import { back, navigate, toast } from '../lib/store';
 import { Button, FullSpinner, Sheet, Spinner } from '../components/common';
 import { Icon } from '../components/Icon';
@@ -125,7 +124,7 @@ export function SessionScreen({ sessionId }: { sessionId: string }) {
     void ipc
       .stagePreview(html)
       .then((id) => {
-        if (alive) setPreviewSrc(previewUrl(id));
+        if (alive) setPreviewSrc(ipc.previewSrc(id));
       })
       .catch(() => {
         if (alive) setPreviewSrc(null);

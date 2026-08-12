@@ -1,49 +1,38 @@
-import { invoke } from '@tauri-apps/api/core';
+import { isTauri, type ApiError, type RequestSpec, type SessionState } from './transport';
+import { tauriTransport } from './transport.tauri';
+import { webTransport } from './transport.web';
 
-export interface ApiError {
-  kind: 'network' | 'unauthorized' | 'api' | 'decode';
-  status: number;
-  code: string | null;
-  message: string;
-}
+export type { ApiError, RequestSpec, SessionState };
+
+/** Desktop talks to Rust; the browser talks to the API directly. */
+const transport = isTauri ? tauriTransport : webTransport;
 
 export function isApiError(e: unknown): e is ApiError {
   return typeof e === 'object' && e !== null && 'kind' in e && 'message' in e;
 }
 
-export interface RequestSpec {
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  path: string;
-  query?: Record<string, string | number | boolean | null | undefined>;
-  body?: unknown;
-}
-
-/** Authenticated call. Rust attaches and refreshes the bearer token. */
+/** Authenticated call. Credentials are attached and refreshed for us. */
 export function request<T>(spec: RequestSpec): Promise<T> {
-  return invoke<T>('api_request', { spec });
+  return transport.request<T>(spec);
 }
 
-/** Login endpoints — Rust adopts the returned token pair. */
+/** Login endpoints — the returned token pair is adopted. */
 export function authRequest<T>(spec: RequestSpec): Promise<T> {
-  return invoke<T>('api_auth_request', { spec });
-}
-
-export interface SessionState {
-  loggedIn: boolean;
-  userId: string | null;
+  return transport.authRequest<T>(spec);
 }
 
 export const ipc = {
-  sessionState: () => invoke<SessionState>('session_state'),
-  logout: () => invoke<void>('logout'),
-  gameUrl: (gameId: string) => invoke<string>('game_url', { gameId }),
-  shareUrl: (gameId: string) => invoke<string>('share_url', { gameId }),
-  inviteUrl: (code: string) => invoke<string>('invite_url', { code }),
-  stagePreview: (html: string) => invoke<string>('stage_preview', { html }),
-  gameToken: () => invoke<string | null>('game_token'),
-  loginDiscord: () => invoke<unknown>('login_discord'),
-  loginGoogle: () => invoke<unknown>('login_google'),
-  openExternal: (url: string) => invoke<void>('open_external', { url }),
+  sessionState: () => transport.sessionState(),
+  logout: () => transport.logout(),
+  gameUrl: (gameId: string) => transport.gameUrl(gameId),
+  shareUrl: (gameId: string) => transport.shareUrl(gameId),
+  inviteUrl: (code: string) => transport.inviteUrl(code),
+  gameToken: () => transport.gameToken(),
+  loginDiscord: () => transport.loginDiscord(),
+  loginGoogle: () => transport.loginGoogle(),
+  openExternal: (url: string) => transport.openExternal(url),
+  stagePreview: (html: string) => transport.stagePreview(html),
+  previewSrc: (id: string) => transport.previewSrc(id),
 };
 
 /** Human-readable message for any thrown value. */
