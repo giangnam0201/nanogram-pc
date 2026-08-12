@@ -13,6 +13,7 @@ import {
   type SessionState,
   type Transport,
 } from './transport';
+import { consumeDiscordCode, googleIdToken, startDiscord } from './oauth.web';
 
 const STORAGE_KEY = 'nanogram.session';
 
@@ -198,17 +199,16 @@ export async function primeCdnSession(): Promise<void> {
 
 /* ---------------------------------------------------------------- oauth --- */
 
-/* Google and Discord are desktop-only. Both providers validate the redirect
-   URI against Nanogram's server-side allowlist, which contains the Android and
-   web app targets — not arbitrary deployments of this client. The desktop build
-   works around it by watching an embedded webview, which a browser cannot do.
-   Rather than fail cryptically, say so. */
-function unsupportedOauth(provider: 'Google' | 'Discord'): never {
-  throw apiError(
-    'api',
-    501,
-    `${provider} sign-in is only available in the desktop app. Use your email address to sign in here.`,
-  );
+/** Finish a Discord round trip, if this page load is one. */
+export async function completeDiscordIfReturning(): Promise<boolean> {
+  const returned = consumeDiscordCode();
+  if (!returned) return false;
+  await authRequest({
+    method: 'POST',
+    path: 'auth/discord',
+    body: { code: returned.code, redirectUri: returned.redirectUri },
+  });
+  return true;
 }
 
 export const webTransport: Transport = {
@@ -250,10 +250,17 @@ export const webTransport: Transport = {
   },
 
   async loginGoogle() {
-    return unsupportedOauth('Google');
+    const idToken = await googleIdToken();
+    return authRequest({ method: 'POST', path: 'v2/auth/google', body: { idToken } });
   },
+
   async loginDiscord() {
-    return unsupportedOauth('Discord');
+    // Discord needs its client id from the server, exactly as on Android.
+    const cfg = await request<{ discordClientId?: string }>({ method: 'GET', path: 'config' });
+    if (!cfg.discordClientId) {
+      throw apiError('api', 503, 'Discord sign-in is unavailable right now.');
+    }
+    return startDiscord(cfg.discordClientId);
   },
 
   async openExternal(url) {

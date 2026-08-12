@@ -7,6 +7,7 @@ import { Button, Spinner } from '../components/common';
 import { Icon } from '../components/Icon';
 import { WelcomeCards } from '../components/WelcomeCards';
 import { isTauri } from '../lib/transport';
+import { discordConfigured } from '../lib/oauth.web';
 
 type Step = 'welcome' | 'email' | 'code';
 
@@ -102,21 +103,20 @@ export function LoginScreen() {
               {t('welcome_continue_with_email')}
             </Button>
 
-            {/* Both providers pin their redirect URI to Nanogram's own
-                allowlist, which only the desktop build can satisfy. */}
-            {isTauri && (
-              <>
-                <div class="divider">or</div>
+            {/* Discord only appears in the browser once Nanogram has
+                registered this deployment as a redirect target. */}
+            <div class="divider">or</div>
 
-                <Button full variant="outline" onClick={() => void oauth('google')} loading={busy}>
-                  <Icon name="ic_google" size={18} />
-                  {t('login_continue_with_google')}
-                </Button>
-                <Button full variant="outline" onClick={() => void oauth('discord')} disabled={busy}>
-                  <Icon name="ic_discord" size={18} />
-                  {t('login_continue_with_discord')}
-                </Button>
-              </>
+            <Button full variant="outline" onClick={() => void oauth('google')} loading={busy}>
+              <Icon name="ic_google" size={18} />
+              {t('login_continue_with_google')}
+            </Button>
+
+            {(isTauri || discordConfigured()) && (
+              <Button full variant="outline" onClick={() => void oauth('discord')} disabled={busy}>
+                <Icon name="ic_discord" size={18} />
+                {t('login_continue_with_discord')}
+              </Button>
             )}
 
             {error && <p class="field-error">{error}</p>}

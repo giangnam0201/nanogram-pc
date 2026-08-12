@@ -1,7 +1,7 @@
 import { signal, computed } from '@preact/signals';
-import { ipc } from './ipc';
+import { errorMessage, ipc } from './ipc';
 import { isTauri } from './transport';
-import { primeCdnSession } from './transport.web';
+import { completeDiscordIfReturning, primeCdnSession } from './transport.web';
 import { profile } from './api';
 import type { Me } from './types';
 
@@ -55,6 +55,14 @@ export const needsOnboarding = computed(() => {
 });
 
 export async function refreshSession() {
+  if (!isTauri) {
+    // Landing back from Discord carries a one-time code in the query string.
+    try {
+      await completeDiscordIfReturning();
+    } catch (e) {
+      toast(errorMessage(e, 'Discord sign-in failed'), 'error');
+    }
+  }
   const state = await ipc.sessionState();
   loggedIn.value = state.loggedIn;
   if (state.loggedIn) {
