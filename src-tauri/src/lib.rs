@@ -71,7 +71,10 @@ pub fn run() {
             match previews.get(id) {
                 Some(html) => tauri::http::Response::builder()
                     .status(200)
-                    .header(tauri::http::header::CONTENT_TYPE, "text/html; charset=utf-8")
+                    .header(
+                        tauri::http::header::CONTENT_TYPE,
+                        "text/html; charset=utf-8",
+                    )
                     .header("Cache-Control", "no-store")
                     .body(html.into_bytes())
                     .unwrap_or_else(|_| empty_response(500)),

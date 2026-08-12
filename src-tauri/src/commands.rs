@@ -7,8 +7,8 @@
 use crate::cdn::Cdn;
 use crate::config;
 use crate::http::{Api, ApiError, ApiResult, RequestSpec};
-use crate::preview::Previews;
 use crate::oauth;
+use crate::preview::Previews;
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::sync::{Arc, Mutex};
