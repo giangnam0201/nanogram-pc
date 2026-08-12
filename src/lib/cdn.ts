@@ -21,9 +21,8 @@ const PROXIED_HOSTS = new Set([
 /** Windows serves custom schemes over `http://<scheme>.localhost`. */
 const isWindows = /Windows/i.test(navigator.userAgent);
 
-function base(): string {
-  if (isTauri) return isWindows ? 'http://cdn.localhost/' : 'cdn://localhost/';
-  return CDN_PROXY ? `${CDN_PROXY}/` : '';
+function tauriBase(): string {
+  return isWindows ? 'http://cdn.localhost/' : 'cdn://localhost/';
 }
 
 /**
@@ -44,11 +43,15 @@ export function cdnUrl(url: string | null | undefined): string | undefined {
     return url;
   }
 
-  const prefix = base();
-  if (!prefix) return url; // no proxy available — let it try directly
+  const target = `${parsed.hostname}${parsed.pathname}${parsed.search}`;
 
-  // encodeURI, not encodeURIComponent: path separators must survive so the
-  // handler can split host from path.
-  const target = encodeURI(`${parsed.hostname}${parsed.pathname}`);
-  return `${prefix}${target}${parsed.search}`;
+  if (isTauri) {
+    // encodeURI, not encodeURIComponent: the Rust handler splits on '/'.
+    return `${tauriBase()}${encodeURI(target)}`;
+  }
+
+  if (!CDN_PROXY) return url; // hosted without a proxy — let it try directly
+  // Passed as a query param: Vercel resolves path segments that look like
+  // files against static output before any function sees them.
+  return `${CDN_PROXY}/cdn?u=${encodeURIComponent(target)}`;
 }

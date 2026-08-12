@@ -158,7 +158,7 @@ async function authRequest<T>(spec: RequestSpec): Promise<T> {
 /* ----------------------------------------------------------------- cdn --- */
 
 /** Base of the serverless media proxy, or '' when hosted without one. */
-export const CDN_PROXY: string = (import.meta.env.VITE_CDN_PROXY ?? '/api/cdn').replace(/\/$/, '');
+export const CDN_PROXY: string = (import.meta.env.VITE_CDN_PROXY ?? '/api').replace(/\/$/, '');
 
 /**
  * Hand the access token to the proxy once, so it can mint CloudFront cookies
@@ -170,7 +170,7 @@ export async function primeCdnSession(): Promise<void> {
   const token = load().accessToken;
   if (!token || !CDN_PROXY) return;
   try {
-    await fetch(`${CDN_PROXY}/session`, {
+    await fetch(`${CDN_PROXY}/cdn-session`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       credentials: 'include',

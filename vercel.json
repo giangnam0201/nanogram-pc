@@ -5,7 +5,6 @@
   "installCommand": "npm ci",
   "framework": "vite",
   "rewrites": [
-    { "source": "/api/cdn/:path*", "destination": "/api/cdn/:path*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
