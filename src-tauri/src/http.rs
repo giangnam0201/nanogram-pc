@@ -269,8 +269,7 @@ impl Api {
         }
 
         let (code, message) = parse_error_body(&bytes);
-        let message =
-            message.unwrap_or_else(|| format!("Request failed ({})", status.as_u16()));
+        let message = message.unwrap_or_else(|| format!("Request failed ({})", status.as_u16()));
         Err(ApiError::Api {
             status: status.as_u16(),
             code,
@@ -370,8 +369,7 @@ mod tests {
 
     #[test]
     fn reads_nested_error_envelope() {
-        let (code, msg) =
-            parse_error_body(br#"{"error":{"code":"bad_request","message":"Nope"}}"#);
+        let (code, msg) = parse_error_body(br#"{"error":{"code":"bad_request","message":"Nope"}}"#);
         assert_eq!(code.as_deref(), Some("bad_request"));
         assert_eq!(msg.as_deref(), Some("Nope"));
     }
