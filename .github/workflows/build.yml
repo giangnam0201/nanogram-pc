@@ -23,8 +23,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build native exe
-        shell: cmd
-        run: gradlew.bat createDistributable
+        run: gradle createDistributable
 
       - uses: actions/upload-artifact@v4
         with:
@@ -42,7 +41,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build native app
-        run: sh gradlew createDistributable
+        run: gradle createDistributable
 
       - uses: actions/upload-artifact@v4
         with:
@@ -60,7 +59,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build native app
-        run: sh gradlew createDistributable
+        run: gradle createDistributable
 
       - uses: actions/upload-artifact@v4
         with:
