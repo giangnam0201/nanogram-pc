@@ -205,8 +205,7 @@ impl Api {
             if bytes.is_empty() {
                 return Ok(Value::Null);
             }
-            return serde_json::from_slice(&bytes)
-                .map_err(|e| ApiError::Decode(format!("{e}")));
+            return serde_json::from_slice(&bytes).map_err(|e| ApiError::Decode(format!("{e}")));
         }
 
         if status == StatusCode::UNAUTHORIZED {

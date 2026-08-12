@@ -138,7 +138,8 @@ pub fn google_authorize_url(
     challenge: &str,
     nonce: &str,
 ) -> String {
-    let mut u = url::Url::parse("https://accounts.google.com/o/oauth2/v2/auth").expect("static url");
+    let mut u =
+        url::Url::parse("https://accounts.google.com/o/oauth2/v2/auth").expect("static url");
     u.query_pairs_mut()
         .append_pair("client_id", client_id)
         .append_pair("redirect_uri", redirect_uri)
@@ -175,7 +176,10 @@ mod tests {
             "https://api.nanogram.app/auth/discord/callback/",
             want
         ));
-        assert!(!is_redirect_match("https://discord.com/oauth2/authorize", want));
+        assert!(!is_redirect_match(
+            "https://discord.com/oauth2/authorize",
+            want
+        ));
         assert!(!is_redirect_match(
             "https://evil.example/auth/discord/callback?code=abc",
             want
@@ -197,6 +201,9 @@ mod tests {
 
         let g = google_authorize_url("cid", "http://127.0.0.1:1/callback", "st", "ch", "nc");
         assert!(g.contains("code_challenge_method=S256"));
-        assert!(g.contains("scope=openid+email+profile") || g.contains("scope=openid%20email%20profile"));
+        assert!(
+            g.contains("scope=openid+email+profile")
+                || g.contains("scope=openid%20email%20profile")
+        );
     }
 }

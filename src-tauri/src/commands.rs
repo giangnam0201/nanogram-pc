@@ -115,31 +115,28 @@ async fn capture_oauth_redirect(
     app.run_on_main_thread(move || {
         let sender = sender.clone();
         let redirect_uri = redirect_uri.clone();
-        let result = WebviewWindowBuilder::new(
-            &app_for_build,
-            &build_label,
-            WebviewUrl::External(parsed),
-        )
-        .title(title)
-        .inner_size(520.0, 720.0)
-        .center()
-        .resizable(true)
-        .on_navigation(move |url| {
-            let current = url.to_string();
-            if oauth::is_redirect_match(&current, &redirect_uri) {
-                if let Ok(mut guard) = sender.lock() {
-                    if let Some(tx) = guard.take() {
-                        let _ = tx.send(oauth::parse_query(&current));
+        let result =
+            WebviewWindowBuilder::new(&app_for_build, &build_label, WebviewUrl::External(parsed))
+                .title(title)
+                .inner_size(520.0, 720.0)
+                .center()
+                .resizable(true)
+                .on_navigation(move |url| {
+                    let current = url.to_string();
+                    if oauth::is_redirect_match(&current, &redirect_uri) {
+                        if let Ok(mut guard) = sender.lock() {
+                            if let Some(tx) = guard.take() {
+                                let _ = tx.send(oauth::parse_query(&current));
+                            }
+                        }
+                        // Stop the redirect from loading; we already have the code.
+                        return false;
                     }
-                }
-                // Stop the redirect from loading; we already have the code.
-                return false;
-            }
-            true
-        })
-        .build()
-        .map(|_| ())
-        .map_err(|e| e.to_string());
+                    true
+                })
+                .build()
+                .map(|_| ())
+                .map_err(|e| e.to_string());
         let _ = built_tx.send(result);
     })
     .map_err(|e| ApiError::Network(e.to_string()))?;
@@ -268,11 +265,7 @@ pub async fn login_google(app: AppHandle, api: State<'_, Arc<Api>>) -> ApiResult
 
 /// Trade the authorization code for an `id_token`, which is what
 /// `v2/auth/google` consumes.
-async fn exchange_google_code(
-    code: &str,
-    verifier: &str,
-    redirect_uri: &str,
-) -> ApiResult<String> {
+async fn exchange_google_code(code: &str, verifier: &str, redirect_uri: &str) -> ApiResult<String> {
     let client = reqwest::Client::new();
     let resp = client
         .post("https://oauth2.googleapis.com/token")
