@@ -1,8 +1,8 @@
 package app.nanogram.pc.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,19 +38,16 @@ fun DiscoverScreen(
             )
         )
 
-        // Category chips
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             listOf("All", "Blast", "Puzzle", "Racing", "AI Gen", "Remix").forEach { cat ->
                 FilterChip(
-                    selected = false,
-                    onClick = { },
+                    selected = false, onClick = { },
                     label = { Text(cat, fontSize = 12.sp) },
                     colors = FilterChipDefaults.filterChipColors(
-                        containerColor = DarkBorder,
-                        labelColor = TextLight
+                        containerColor = DarkBorder, labelColor = TextLight
                     )
                 )
             }
@@ -64,7 +61,7 @@ fun DiscoverScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(games) { game ->
+            items(games) { game: GameItem ->
                 Card(
                     onClick = { onPlay(game) },
                     shape = RoundedCornerShape(12.dp),

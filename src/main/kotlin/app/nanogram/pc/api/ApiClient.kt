@@ -22,85 +22,69 @@ object ApiClient {
 
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) { json(json) }
-        defaultRequest {
-            url(BASE_URL)
-            contentType(ContentType.Application.Json)
-        }
     }
 
     private var authToken: String? = null
 
+    private suspend inline fun <reified T> get(path: String): T =
+        client.get("$BASE_URL$path") { contentType(ContentType.Application.Json) }.body()
+
+    private suspend fun post(path: String, body: Any? = null): HttpResponse {
+        return client.post("$BASE_URL$path") {
+            contentType(ContentType.Application.Json)
+            if (body != null) setBody(body)
+        }
+    }
+
     suspend fun fetchFeed(): List<GameItem> = try {
-        client.get("/games/feed?limit=20").body()
+        get("/games/feed?limit=20")
     } catch (e: Exception) { emptyList() }
 
     suspend fun searchGames(query: String): List<GameItem> = try {
-        client.get("/games/search?q=$query").body()
+        get("/games/search?q=$query")
     } catch (e: Exception) { emptyList() }
 
     suspend fun fetchGame(id: String): GameItem? = try {
-        client.get("/games/$id").body()
+        get("/games/$id")
     } catch (e: Exception) { null }
 
     suspend fun likeGame(gameId: String) {
-        client.post("/games/$gameId/like")
+        post("/games/$gameId/like")
     }
 
     suspend fun remixGame(gameId: String): GameItem? = try {
-        client.post("/games/remix") {
-            setBody(mapOf("original_id" to gameId))
-        }.body()
+        post("/games/remix", mapOf("original_id" to gameId)).body()
     } catch (e: Exception) { null }
 
     suspend fun createGame(prompt: String, type: String): GameItem? = try {
-        client.post("/v2/gamegen/sessions") {
-            setBody(mapOf("prompt" to prompt, "type" to type))
-        }.body()
+        post("/v2/gamegen/sessions", mapOf("prompt" to prompt, "type" to type)).body()
     } catch (e: Exception) { null }
 
     suspend fun fetchComments(gameId: String): List<Comment> = try {
-        client.get("/games/$gameId/comments").body()
+        get("/games/$gameId/comments")
     } catch (e: Exception) { emptyList() }
 
-    suspend fun postComment(gameId: String, text: String) {
-        client.post("/games/$gameId/comments") {
-            setBody(mapOf("text" to text))
-        }
-    }
-
     suspend fun fetchProfile(userId: String = "me"): UserProfile = try {
-        val headers = authToken?.let { mapOf("Authorization" to "Bearer $it") } ?: emptyMap()
-        client.get("/users/$userId") { headers.forEach { (k, v) -> header(k, v) } }.body()
+        get("/users/$userId")
     } catch (e: Exception) { UserProfile() }
 
     suspend fun loginEmail(email: String) {
-        client.post("/auth/email") { setBody(mapOf("email" to email)) }
+        post("/auth/email", mapOf("email" to email))
     }
 
     suspend fun verifyOtp(code: String): Boolean = try {
-        val resp: HttpResponse = client.post("/auth/verify") { setBody(mapOf("code" to code)) }
-        resp.status == HttpStatusCode.OK
+        post("/auth/verify", mapOf("code" to code)).status == HttpStatusCode.OK
     } catch (e: Exception) { false }
 
     suspend fun fetchInbox(): List<ChatMessage> = try {
-        client.get("/inbox").body()
+        get("/inbox")
     } catch (e: Exception) { emptyList() }
 
     suspend fun sendMessage(recipientId: String, text: String) {
-        client.post("/inbox/send") {
-            setBody(mapOf("to" to recipientId, "text" to text))
-        }
+        post("/inbox/send", mapOf("to" to recipientId, "text" to text))
     }
 
     suspend fun fetchNotifications(): List<Notification> = try {
-        client.get("/notifications").body()
+        get("/notifications")
     } catch (e: Exception) { emptyList() }
-
-    suspend fun followUser(userId: String) {
-        client.post("/users/$userId/follow")
-    }
-
-    suspend fun unfollowUser(userId: String) {
-        client.post("/users/$userId/unfollow")
-    }
 }
