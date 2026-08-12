@@ -206,7 +206,8 @@ export const chat = {
   create: (recipientId: string) =>
     request<T.Chat>({ method: 'POST', path: 'v2/chats', body: { recipientId } }),
 
-  messages: (chatId: string, cursor?: string, limit = 30) =>
+  // Android pages chat history 50 at a time, newest first.
+  messages: (chatId: string, cursor?: string, limit = 50) =>
     request<T.ChatMessagesResponse>({
       method: 'GET',
       path: `v2/chats/${chatId}/messages`,
