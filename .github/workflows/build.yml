@@ -39,6 +39,11 @@ jobs:
           workspaces: src-tauri -> target
 
       - run: npm ci
+
+      # tauri::generate_context! reads the bundle icons at compile time.
+      - name: Generate app icons
+        run: npx tauri icon src/assets/img/app_icon.png
+
       - name: Typecheck + build frontend
         run: npm run build
 
