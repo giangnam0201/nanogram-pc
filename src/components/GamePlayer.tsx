@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { Icon } from './Icon';
 import { ipc } from '../lib/ipc';
 import { t } from '../lib/i18n';
+import { cdnUrl } from '../lib/cdn';
 import { Spinner } from './common';
 
 /* Games are plain web bundles served from games.nanogram.app, exactly as on
@@ -20,11 +21,11 @@ export function useGameUrl(gameId: string | null, fallback?: string | null) {
       return;
     }
     if (fallback) {
-      setUrl(fallback);
+      setUrl(cdnUrl(fallback) ?? null);
       return;
     }
     void ipc.gameUrl(gameId).then((u) => {
-      if (alive) setUrl(u);
+      if (alive) setUrl(cdnUrl(u) ?? null);
     });
     return () => {
       alive = false;

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { gamegen } from '../lib/api';
 import { errorMessage } from '../lib/ipc';
 import { t } from '../lib/i18n';
+import { cdnUrl } from '../lib/cdn';
 import { navigate, toast } from '../lib/store';
 import { Button, EmptyState, Spinner, formatCount, timeAgo } from '../components/common';
 import { Icon } from '../components/Icon';
@@ -144,7 +145,7 @@ export function CreateScreen() {
                 <div class="card-thumb">
                   {d.thumbnailUrl || d.publishedGameThumbnailUrl ? (
                     <img
-                      src={d.thumbnailUrl ?? d.publishedGameThumbnailUrl ?? ''}
+                      src={cdnUrl(d.thumbnailUrl ?? d.publishedGameThumbnailUrl)}
                       alt=""
                       loading="lazy"
                     />

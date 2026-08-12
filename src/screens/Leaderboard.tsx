@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { discover } from '../lib/api';
 import { errorMessage } from '../lib/ipc';
 import { t } from '../lib/i18n';
+import { cdnUrl } from '../lib/cdn';
 import { back } from '../lib/store';
 import { EmptyState, ErrorState, FullSpinner, formatCount } from '../components/common';
 import { GamePlayer } from '../components/GamePlayer';
@@ -73,7 +74,7 @@ export function LeaderboardScreen() {
                   {index + 1}
                 </strong>
                 {game.thumbnailUrl ? (
-                  <img src={game.thumbnailUrl} alt="" class="row-thumb" loading="lazy" />
+                  <img src={cdnUrl(game.thumbnailUrl)} alt="" class="row-thumb" loading="lazy" />
                 ) : (
                   <div class="row-thumb" />
                 )}

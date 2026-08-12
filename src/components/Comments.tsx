@@ -4,6 +4,7 @@ import { Icon } from './Icon';
 import { comments as api } from '../lib/api';
 import { errorMessage } from '../lib/ipc';
 import { t } from '../lib/i18n';
+import { cdnUrl } from '../lib/cdn';
 import { me, navigate, toast } from '../lib/store';
 import type { Comment } from '../lib/types';
 
@@ -129,7 +130,7 @@ export function CommentsSheet({ gameId, locked, onClose, onCountChange }: Props)
                   <div style={{ fontSize: 14, whiteSpace: 'pre-wrap' }}>{c.body}</div>
                   {c.giphyUrl && (
                     <img
-                      src={c.giphyUrl}
+                      src={cdnUrl(c.giphyUrl)}
                       alt=""
                       style={{ maxWidth: 180, borderRadius: 10, marginTop: 6 }}
                     />

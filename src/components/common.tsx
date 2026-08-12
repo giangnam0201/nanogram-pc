@@ -1,5 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { Icon } from './Icon';
+import { cdnUrl } from '../lib/cdn';
 import { t } from '../lib/i18n';
 
 export function Spinner({ size = 24 }: { size?: number }) {
@@ -48,7 +49,11 @@ export function Avatar({
   const initial = (name ?? '?').trim().charAt(0).toUpperCase() || '?';
   return (
     <div class="avatar" style={{ width: size, height: size, fontSize: size * 0.42 }}>
-      {url ? <img src={url} alt="" loading="lazy" decoding="async" /> : <span>{initial}</span>}
+      {url ? (
+        <img src={cdnUrl(url)} alt="" loading="lazy" decoding="async" />
+      ) : (
+        <span>{initial}</span>
+      )}
     </div>
   );
 }

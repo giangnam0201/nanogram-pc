@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { notifications as api } from '../lib/api';
 import { errorMessage } from '../lib/ipc';
 import { t } from '../lib/i18n';
+import { cdnUrl } from '../lib/cdn';
 import { back, navigate, unreadNotifications } from '../lib/store';
 import { Avatar, EmptyState, ErrorState, FullSpinner, timeAgo } from '../components/common';
 import { Icon } from '../components/Icon';
@@ -105,7 +106,7 @@ export function NotificationsScreen() {
                   <div class="row-sub">{timeAgo(n.createdAt ?? n.updatedAt)}</div>
                 </div>
                 {n.game?.thumbnailUrl && (
-                  <img src={n.game.thumbnailUrl} alt="" class="row-thumb" loading="lazy" />
+                  <img src={cdnUrl(n.game.thumbnailUrl)} alt="" class="row-thumb" loading="lazy" />
                 )}
               </button>
             ))}

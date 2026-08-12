@@ -4,6 +4,7 @@
 //! refreshes them and returns JSON. That keeps the access token out of the
 //! webview's reach even though the UI itself is rendered there.
 
+use crate::cdn::Cdn;
 use crate::config;
 use crate::http::{Api, ApiError, ApiResult, RequestSpec};
 use crate::oauth;
@@ -52,7 +53,7 @@ pub async fn api_auth_request(spec: RequestSpec, api: State<'_, Arc<Api>>) -> Ap
 }
 
 #[tauri::command]
-pub async fn logout(api: State<'_, Arc<Api>>) -> ApiResult<()> {
+pub async fn logout(api: State<'_, Arc<Api>>, cdn: State<'_, Arc<Cdn>>) -> ApiResult<()> {
     let refresh = api.session().await.refresh_token;
     if let Some(token) = refresh {
         // Best-effort server-side revoke; local state is cleared regardless.
@@ -66,6 +67,8 @@ pub async fn logout(api: State<'_, Arc<Api>>) -> ApiResult<()> {
             .await;
     }
     api.clear_session().await;
+    // CloudFront cookies are tied to the session that minted them.
+    cdn.clear().await;
     Ok(())
 }
 

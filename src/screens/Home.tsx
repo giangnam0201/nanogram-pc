@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { feed as feedApi, games } from '../lib/api';
 import { errorMessage } from '../lib/ipc';
 import { t } from '../lib/i18n';
+import { cdnUrl } from '../lib/cdn';
 import { me, navigate, toast } from '../lib/store';
 import { Avatar, ErrorState, FullSpinner, formatCount } from '../components/common';
 import { Icon } from '../components/Icon';
@@ -171,7 +172,7 @@ export function HomeScreen() {
               <div class="feed-stage">
                 {isPlaying ? (
                   <iframe
-                    src={game.gameUrl ?? undefined}
+                    src={cdnUrl(game.gameUrl)}
                     title={game.title}
                     sandbox={GAME_SANDBOX}
                     allow="autoplay; fullscreen; gamepad; accelerometer; gyroscope"

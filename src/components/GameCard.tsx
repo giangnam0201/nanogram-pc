@@ -1,6 +1,7 @@
 import { Icon } from './Icon';
 import { formatCount } from './common';
 import { t } from '../lib/i18n';
+import { cdnUrl } from '../lib/cdn';
 
 export interface CardGame {
   id: string;
@@ -30,7 +31,7 @@ export function GameCard({
     <button class="card" onClick={() => onOpen(game)}>
       <div class="card-thumb">
         {game.thumbnailUrl ? (
-          <img src={game.thumbnailUrl} alt="" loading="lazy" decoding="async" />
+          <img src={cdnUrl(game.thumbnailUrl)} alt="" loading="lazy" decoding="async" />
         ) : (
           <div class="center-fill">
             <Icon name="ic_gameboy" size={30} />

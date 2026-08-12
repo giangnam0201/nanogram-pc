@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { chat as chatApi } from '../lib/api';
 import { errorMessage } from '../lib/ipc';
 import { t } from '../lib/i18n';
+import { cdnUrl } from '../lib/cdn';
 import { back, me, navigate, toast } from '../lib/store';
 import { Avatar, FullSpinner, Spinner } from '../components/common';
 import { Icon } from '../components/Icon';
@@ -102,7 +103,12 @@ export function ChatScreen({ chatId }: { chatId: string }) {
                   onClick={() => m.game && navigate({ name: 'game', gameId: m.game.id })}
                 >
                   {m.game.thumbnailUrl && (
-                    <img src={m.game.thumbnailUrl} alt="" class="row-thumb" style={{ width: 44, height: 44 }} />
+                    <img
+                      src={cdnUrl(m.game.thumbnailUrl)}
+                      alt=""
+                      class="row-thumb"
+                      style={{ width: 44, height: 44 }}
+                    />
                   )}
                   <span>{m.gameUnavailable ? t('chat_game_unavailable') : m.game.title}</span>
                 </button>

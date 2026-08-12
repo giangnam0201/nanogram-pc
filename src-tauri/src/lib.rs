@@ -1,17 +1,57 @@
+mod cdn;
 mod commands;
 mod config;
 mod http;
 mod oauth;
 mod store;
 
+use cdn::Cdn;
 use http::Api;
 use std::sync::Arc;
-use tauri::Manager;
+use tauri::{Manager, UriSchemeResponder};
+
+/// Custom scheme the webview uses for anything behind the CloudFront
+/// distribution. See `cdn.rs` for why the traffic is proxied.
+pub const CDN_SCHEME: &str = "cdn";
+
+fn respond(responder: UriSchemeResponder, status: u16, content_type: String, body: Vec<u8>) {
+    let response = tauri::http::Response::builder()
+        .status(status)
+        .header(tauri::http::header::CONTENT_TYPE, content_type)
+        // The proxy is the only consumer; keep it locked down.
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Cache-Control", "public, max-age=300")
+        .body(body);
+
+    match response {
+        Ok(r) => responder.respond(r),
+        Err(e) => log::error!("failed to build cdn response: {e}"),
+    }
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .register_asynchronous_uri_scheme_protocol(CDN_SCHEME, |ctx, request, responder| {
+            let cdn = ctx.app_handle().state::<Arc<Cdn>>().inner().clone();
+
+            // Only the path matters; the host is a placeholder Tauri supplies.
+            let uri = request.uri();
+            let target = match uri.query() {
+                Some(q) => format!("{}?{}", uri.path(), q),
+                None => uri.path().to_string(),
+            };
+
+            tauri::async_runtime::spawn(async move {
+                let Some((host, rest)) = cdn::split_target(&target) else {
+                    respond(responder, 400, "text/plain".into(), b"bad request".to_vec());
+                    return;
+                };
+                let (status, content_type, body) = cdn.fetch(&host, &rest).await;
+                respond(responder, status, content_type, body);
+            });
+        })
         .setup(|app| {
             let dir = app
                 .path()
@@ -20,7 +60,9 @@ pub fn run() {
             std::fs::create_dir_all(&dir).ok();
 
             let api = Api::new(store::SessionStore::new(&dir));
+            let cdn = Cdn::new(api.clone());
             app.manage::<Arc<Api>>(api);
+            app.manage::<Arc<Cdn>>(cdn);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
