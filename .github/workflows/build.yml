@@ -35,10 +35,13 @@ jobs:
       - name: Build
         run: gradle createDistributable
 
+      - name: List build output
+        run: Get-ChildItem -Path build -Recurse -Depth 4 | Select-Object FullName, Length
+
       - uses: actions/upload-artifact@v4
         with:
           name: nanogram-pc-windows
-          path: build/compose/binaries/main/exe/*.exe
+          path: build/compose/binaries/**/*.exe
 
   build-linux:
     name: Linux
@@ -58,10 +61,13 @@ jobs:
       - name: Build
         run: gradle createDistributable
 
+      - name: List build output
+        run: find build -type f | head -30
+
       - uses: actions/upload-artifact@v4
         with:
           name: nanogram-pc-linux
-          path: build/compose/binaries/main/deb/*.deb
+          path: build/compose/binaries/**/*.deb
 
   build-macos:
     name: macOS
@@ -81,10 +87,13 @@ jobs:
       - name: Build
         run: gradle createDistributable
 
+      - name: List build output
+        run: find build -type f | head -30
+
       - uses: actions/upload-artifact@v4
         with:
           name: nanogram-pc-macos
-          path: build/compose/binaries/main/dmg/*.dmg
+          path: build/compose/binaries/**/*.dmg
 
   release:
     name: Release
