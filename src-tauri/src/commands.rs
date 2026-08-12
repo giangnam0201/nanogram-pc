@@ -7,6 +7,7 @@
 use crate::cdn::Cdn;
 use crate::config;
 use crate::http::{Api, ApiError, ApiResult, RequestSpec};
+use crate::preview::Previews;
 use crate::oauth;
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -53,7 +54,11 @@ pub async fn api_auth_request(spec: RequestSpec, api: State<'_, Arc<Api>>) -> Ap
 }
 
 #[tauri::command]
-pub async fn logout(api: State<'_, Arc<Api>>, cdn: State<'_, Arc<Cdn>>) -> ApiResult<()> {
+pub async fn logout(
+    api: State<'_, Arc<Api>>,
+    cdn: State<'_, Arc<Cdn>>,
+    previews: State<'_, Previews>,
+) -> ApiResult<()> {
     let refresh = api.session().await.refresh_token;
     if let Some(token) = refresh {
         // Best-effort server-side revoke; local state is cleared regardless.
@@ -69,6 +74,7 @@ pub async fn logout(api: State<'_, Arc<Api>>, cdn: State<'_, Arc<Cdn>>) -> ApiRe
     api.clear_session().await;
     // CloudFront cookies are tied to the session that minted them.
     cdn.clear().await;
+    previews.clear();
     Ok(())
 }
 
@@ -85,6 +91,13 @@ pub fn share_url(game_id: String) -> String {
 #[tauri::command]
 pub fn invite_url(code: String) -> String {
     config::invite_url(&code)
+}
+
+/// Stage generated HTML and return the id to load it by. See `preview.rs` for
+/// why a build cannot simply go into an `srcdoc` iframe.
+#[tauri::command]
+pub fn stage_preview(html: String, previews: State<'_, Previews>) -> String {
+    previews.insert(html)
 }
 
 /// Token for the game runtime, refreshed if stale.

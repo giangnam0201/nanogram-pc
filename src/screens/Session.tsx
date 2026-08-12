@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { gamegen } from '../lib/api';
-import { errorMessage } from '../lib/ipc';
+import { errorMessage, ipc } from '../lib/ipc';
 import { t } from '../lib/i18n';
+import { previewUrl } from '../lib/cdn';
 import { back, navigate, toast } from '../lib/store';
 import { Button, FullSpinner, Sheet, Spinner } from '../components/common';
 import { Icon } from '../components/Icon';
@@ -22,6 +23,7 @@ export function SessionScreen({ sessionId }: { sessionId: string }) {
   const [publishing, setPublishing] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishTitle, setPublishTitle] = useState('');
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
   async function load() {
@@ -111,9 +113,29 @@ export function SessionScreen({ sessionId }: { sessionId: string }) {
     }
   }
 
-  if (!data) return <FullSpinner />;
+  const html = data ? (data.remixHtml ?? lastSnapshot(data.messages)) : null;
 
-  const html = data.remixHtml ?? lastSnapshot(data.messages);
+  // Stage each new build with Rust so it can be served on its own origin.
+  useEffect(() => {
+    let alive = true;
+    if (!html) {
+      setPreviewSrc(null);
+      return;
+    }
+    void ipc
+      .stagePreview(html)
+      .then((id) => {
+        if (alive) setPreviewSrc(previewUrl(id));
+      })
+      .catch(() => {
+        if (alive) setPreviewSrc(null);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [html]);
+
+  if (!data) return <FullSpinner />;
 
   return (
     <div class="screen" style={{ overflow: 'hidden', height: '100%' }}>
@@ -189,11 +211,12 @@ export function SessionScreen({ sessionId }: { sessionId: string }) {
         </div>
 
         <div style={{ background: '#000', display: 'grid', placeItems: 'center', minHeight: 0 }}>
-          {html ? (
+          {previewSrc ? (
             <iframe
-              srcdoc={html}
+              src={previewSrc}
               title="Preview"
               sandbox={GAME_SANDBOX}
+              allow="autoplay; fullscreen; gamepad"
               style={{ width: '100%', height: '100%', border: 0, aspectRatio: '9 / 16' }}
             />
           ) : (

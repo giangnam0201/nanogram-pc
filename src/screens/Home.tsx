@@ -19,11 +19,16 @@ import type { GameFeedItem } from '../lib/types';
 const PAGE = 10;
 const PREFETCH_AT = 3; // load more when this many slides remain
 
+/* The feed payload carries no thumbnail, but published games always have one at
+   a predictable path on the CDN. */
+function thumbnailFor(gameId: string): string {
+  return `https://games.nanogram.app/games/${gameId}/thumbnail.png`;
+}
+
 export function HomeScreen() {
   const [items, setItems] = useState<GameFeedItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState(0);
-  const [playing, setPlaying] = useState<string | null>(null);
   const [shareFor, setShareFor] = useState<GameFeedItem | null>(null);
   const [commentsFor, setCommentsFor] = useState<GameFeedItem | null>(null);
 
@@ -166,11 +171,12 @@ export function HomeScreen() {
       <div class="feed" ref={scroller}>
         {items.map((game, index) => {
           const isActive = index === active;
-          const isPlaying = playing === game.id && isActive;
           return (
             <section class="feed-slide" data-index={index} key={`${game.id}-${index}`}>
               <div class="feed-stage">
-                {isPlaying ? (
+                {/* Only the centred slide is mounted. Scrolling away unmounts
+                    the frame, which stops the game and frees its memory. */}
+                {isActive ? (
                   <iframe
                     src={cdnUrl(game.gameUrl)}
                     title={game.title}
@@ -178,15 +184,12 @@ export function HomeScreen() {
                     allow="autoplay; fullscreen; gamepad; accelerometer; gyroscope"
                   />
                 ) : (
-                  <button
-                    class="feed-cover"
-                    onClick={() => setPlaying(game.id)}
-                    aria-label={t('discover_quick_play')}
-                  >
+                  <div class="feed-cover" aria-hidden="true">
+                    <img src={cdnUrl(thumbnailFor(game.id))} alt="" loading="lazy" decoding="async" />
                     <div class="feed-play">
                       <Icon name="ic_quick_play" size={30} />
                     </div>
-                  </button>
+                  </div>
                 )}
 
                 <div class="feed-meta">

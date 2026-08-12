@@ -17,6 +17,15 @@ function proxyBase(): string {
 }
 
 /**
+ * URL for a staged GameGen build. Previews get their own origin so the app's
+ * `script-src 'self'` does not silently kill the game's inline scripts, which
+ * is what an `srcdoc` iframe would inherit.
+ */
+export function previewUrl(id: string): string {
+  return isWindows ? `http://preview.localhost/${id}` : `preview://localhost/${id}`;
+}
+
+/**
  * Rewrite a CDN URL onto the local proxy. Anything else is returned untouched,
  * so avatars on third-party hosts still load directly.
  */

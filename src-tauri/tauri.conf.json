@@ -35,7 +35,7 @@
         "img-src": "'self' data: blob: https: cdn: http://cdn.localhost",
         "media-src": "'self' data: blob: https: cdn: http://cdn.localhost",
         "connect-src": "'self' ipc: http://ipc.localhost https: cdn: http://cdn.localhost",
-        "frame-src": "'self' cdn: http://cdn.localhost https://games.nanogram.app",
+        "frame-src": "'self' cdn: http://cdn.localhost preview: http://preview.localhost https://be.nanogram.app https://games.nanogram.app",
         "worker-src": "'self' blob:"
       },
       "assetProtocol": {
