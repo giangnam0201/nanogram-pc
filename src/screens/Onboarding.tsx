@@ -108,10 +108,11 @@ export function OnboardingScreen() {
     try {
       await auth.completeOnboarding({
         username: username.trim(),
-        dateOfBirth: iso,
+        // The Android client sends a full instant, not a bare date.
+        dateOfBirth: iso ? `${iso}T00:00:00Z` : null,
         referralCode: referral.trim(),
-        // Nanotag defaults; the profile editor can change them later.
-        nanotag: { colorPreset: 'green', chaosPercentage: 50 },
+        // colorPreset and chaosPercentage are both integers.
+        nanotag: { colorPreset: 0, chaosPercentage: 50 },
       });
       await loadMe();
     } catch (e) {

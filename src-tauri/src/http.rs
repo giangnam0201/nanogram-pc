@@ -61,13 +61,74 @@ struct TokenPair {
     user_id: Option<String>,
 }
 
-/// Server error envelope. The Android client maps `code` to a localized string
-/// via the `api_error_*` resources, so we surface it verbatim to the UI.
-#[derive(Debug, Default, Deserialize)]
-struct ErrorBody {
-    code: Option<String>,
-    message: Option<String>,
-    error: Option<String>,
+/// Pull a human-readable code and message out of an error response.
+///
+/// The API is not uniform: some endpoints answer `{"code","message"}`, others
+/// nest under `error`, and validation failures come back as a list of issues.
+/// Rather than guess one shape, probe the ones the server actually uses so the
+/// UI shows a real reason instead of a bare status code.
+fn parse_error_body(bytes: &[u8]) -> (Option<String>, Option<String>) {
+    let Ok(v) = serde_json::from_slice::<Value>(bytes) else {
+        // Not JSON — fall back to a trimmed snippet of the raw body.
+        let text = String::from_utf8_lossy(bytes).trim().to_string();
+        return (None, (!text.is_empty()).then(|| truncate(&text, 300)));
+    };
+
+    let str_at = |v: &Value, key: &str| {
+        v.get(key)
+            .and_then(Value::as_str)
+            .map(str::to_string)
+            .filter(|s| !s.is_empty())
+    };
+
+    // `error` may be a string or a nested object.
+    let nested = v.get("error").filter(|e| e.is_object());
+    let scope = nested.unwrap_or(&v);
+
+    let code = str_at(scope, "code").or_else(|| str_at(&v, "code"));
+
+    let message = str_at(scope, "message")
+        .or_else(|| str_at(scope, "detail"))
+        .or_else(|| str_at(&v, "message"))
+        .or_else(|| str_at(&v, "error"))
+        .or_else(|| {
+            // Validation lists: [{"message"|"path"|"field", ...}, …]
+            v.get("errors")
+                .or_else(|| v.get("issues"))
+                .and_then(Value::as_array)
+                .map(|items| {
+                    items
+                        .iter()
+                        .filter_map(|item| {
+                            let msg = item
+                                .get("message")
+                                .and_then(Value::as_str)
+                                .unwrap_or_default();
+                            let field = item
+                                .get("field")
+                                .or_else(|| item.get("path"))
+                                .and_then(Value::as_str);
+                            match (field, msg) {
+                                (_, "") => None,
+                                (Some(f), m) => Some(format!("{f}: {m}")),
+                                (None, m) => Some(m.to_string()),
+                            }
+                        })
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                })
+                .filter(|s| !s.is_empty())
+        });
+
+    (code, message)
+}
+
+fn truncate(s: &str, max: usize) -> String {
+    if s.chars().count() <= max {
+        return s.to_string();
+    }
+    let cut: String = s.chars().take(max).collect();
+    format!("{cut}…")
 }
 
 pub struct Api {
@@ -207,14 +268,12 @@ impl Api {
             return Err(ApiError::Unauthorized);
         }
 
-        let err: ErrorBody = serde_json::from_slice(&bytes).unwrap_or_default();
-        let message = err
-            .message
-            .or(err.error.clone())
-            .unwrap_or_else(|| format!("Request failed ({})", status.as_u16()));
+        let (code, message) = parse_error_body(&bytes);
+        let message =
+            message.unwrap_or_else(|| format!("Request failed ({})", status.as_u16()));
         Err(ApiError::Api {
             status: status.as_u16(),
-            code: err.code,
+            code,
             message,
         })
     }
@@ -300,6 +359,51 @@ mod tests {
         assert!(config::is_unauthenticated_path("auth/refresh"));
         assert!(!config::is_unauthenticated_path("v2/me"));
         assert!(!config::is_unauthenticated_path("v2/games/feed"));
+    }
+
+    #[test]
+    fn reads_flat_error_envelope() {
+        let (code, msg) = parse_error_body(br#"{"code":"email_taken","message":"Taken"}"#);
+        assert_eq!(code.as_deref(), Some("email_taken"));
+        assert_eq!(msg.as_deref(), Some("Taken"));
+    }
+
+    #[test]
+    fn reads_nested_error_envelope() {
+        let (code, msg) =
+            parse_error_body(br#"{"error":{"code":"bad_request","message":"Nope"}}"#);
+        assert_eq!(code.as_deref(), Some("bad_request"));
+        assert_eq!(msg.as_deref(), Some("Nope"));
+    }
+
+    #[test]
+    fn reads_error_as_plain_string() {
+        let (_, msg) = parse_error_body(br#"{"error":"Something broke"}"#);
+        assert_eq!(msg.as_deref(), Some("Something broke"));
+    }
+
+    #[test]
+    fn joins_validation_issues() {
+        let (_, msg) = parse_error_body(
+            br#"{"errors":[{"field":"nanotag.colorPreset","message":"expected number"},
+                          {"field":"dateOfBirth","message":"invalid datetime"}]}"#,
+        );
+        assert_eq!(
+            msg.as_deref(),
+            Some("nanotag.colorPreset: expected number, dateOfBirth: invalid datetime")
+        );
+    }
+
+    #[test]
+    fn falls_back_to_raw_body_when_not_json() {
+        let (code, msg) = parse_error_body(b"upstream timeout");
+        assert!(code.is_none());
+        assert_eq!(msg.as_deref(), Some("upstream timeout"));
+    }
+
+    #[test]
+    fn empty_body_yields_no_message() {
+        assert_eq!(parse_error_body(b""), (None, None));
     }
 
     #[test]

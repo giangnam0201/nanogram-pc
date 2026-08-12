@@ -20,10 +20,11 @@ export const auth = {
 
   completeOnboarding: (body: {
     username: string;
+    /** Full instant, e.g. `2001-05-04T00:00:00Z` — a bare date is rejected. */
     dateOfBirth?: string | null;
     ageRange?: { lower: number; upper?: number | null } | null;
     referralCode: string;
-    nanotag: { colorPreset: string; chaosPercentage: number };
+    nanotag: { colorPreset: number; chaosPercentage: number };
   }) => authRequest<unknown>({ method: 'POST', path: 'v2/auth/onboarding', body }),
 
   setDateOfBirth: (dateOfBirth: string) =>
@@ -101,7 +102,7 @@ export const discover = {
 export const profile = {
   me: () => request<T.Me>({ method: 'GET', path: 'v2/me' }),
 
-  patchMe: (body: { username?: string; nanotag?: { colorPreset: string; chaosPercentage: number } }) =>
+  patchMe: (body: { username?: string; nanotag?: { colorPreset: number; chaosPercentage: number } }) =>
     request<T.Me>({ method: 'PATCH', path: 'v2/me', body }),
 
   myGames: (cursor?: string, limit = PAGE) =>
