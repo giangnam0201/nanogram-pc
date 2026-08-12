@@ -9,7 +9,6 @@
 //! with no inherited policy, so the build runs exactly as it will once
 //! published — without loosening the CSP of the app itself.
 
-use std::collections::HashMap;
 use std::sync::Mutex;
 
 /// Only a couple of builds are ever on screen; keeping more just holds memory.
@@ -54,13 +53,9 @@ impl Previews {
         self.entries.lock().expect("previews poisoned").clear();
     }
 
-    pub fn snapshot(&self) -> HashMap<String, usize> {
-        self.entries
-            .lock()
-            .expect("previews poisoned")
-            .iter()
-            .map(|(k, v)| (k.clone(), v.len()))
-            .collect()
+    #[cfg(test)]
+    fn len(&self) -> usize {
+        self.entries.lock().expect("previews poisoned").len()
     }
 }
 
@@ -96,7 +91,7 @@ mod tests {
         let a = p.insert("<p>same</p>".into());
         let b = p.insert("<p>same</p>".into());
         assert_eq!(a, b);
-        assert_eq!(p.snapshot().len(), 1);
+        assert_eq!(p.len(), 1);
     }
 
     #[test]
@@ -106,7 +101,7 @@ mod tests {
         for i in 1..=MAX_ENTRIES {
             p.insert(format!("build-{i}"));
         }
-        assert_eq!(p.snapshot().len(), MAX_ENTRIES);
+        assert_eq!(p.len(), MAX_ENTRIES);
         assert!(p.get(&first).is_none(), "oldest build should be evicted");
     }
 
@@ -115,6 +110,6 @@ mod tests {
         let p = Previews::new();
         p.insert("x".into());
         p.clear();
-        assert!(p.snapshot().is_empty());
+        assert_eq!(p.len(), 0);
     }
 }
