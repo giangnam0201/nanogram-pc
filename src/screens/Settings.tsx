@@ -103,13 +103,17 @@ export function SettingsScreen() {
             <button
               class="row"
               onClick={() => {
-                void navigator.clipboard.writeText(user.referralCode ?? '');
-                toast(t('share_copy_link'));
+                void (async () => {
+                  // Share the full invite link, not the bare code.
+                  const link = await ipc.inviteUrl(user.referralCode ?? '');
+                  await navigator.clipboard.writeText(link);
+                  toast(t('share_copy_link'));
+                })();
               }}
             >
               <Icon name="ic_card_giftcard" size={19} />
               <div class="row-main">
-                <div class="row-title">Referral code</div>
+                <div class="row-title">Invite friends</div>
                 <div class="row-sub">{user.referralCode}</div>
               </div>
               <Icon name="ic_content_copy" size={16} />

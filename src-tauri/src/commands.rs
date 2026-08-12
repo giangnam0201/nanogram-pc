@@ -79,6 +79,11 @@ pub fn share_url(game_id: String) -> String {
     config::game_share_url(&game_id)
 }
 
+#[tauri::command]
+pub fn invite_url(code: String) -> String {
+    config::invite_url(&code)
+}
+
 /// Token for the game runtime, refreshed if stale.
 #[tauri::command]
 pub async fn game_token(api: State<'_, Arc<Api>>) -> ApiResult<Option<String>> {

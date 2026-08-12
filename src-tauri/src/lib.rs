@@ -30,6 +30,7 @@ pub fn run() {
             commands::logout,
             commands::game_url,
             commands::share_url,
+            commands::invite_url,
             commands::game_token,
             commands::login_discord,
             commands::login_google,

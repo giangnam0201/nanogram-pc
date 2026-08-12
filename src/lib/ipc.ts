@@ -38,6 +38,7 @@ export const ipc = {
   logout: () => invoke<void>('logout'),
   gameUrl: (gameId: string) => invoke<string>('game_url', { gameId }),
   shareUrl: (gameId: string) => invoke<string>('share_url', { gameId }),
+  inviteUrl: (code: string) => invoke<string>('invite_url', { code }),
   gameToken: () => invoke<string | null>('game_token'),
   loginDiscord: () => invoke<unknown>('login_discord'),
   loginGoogle: () => invoke<unknown>('login_google'),

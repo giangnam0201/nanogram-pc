@@ -116,11 +116,6 @@ impl Api {
         self.session.read().await.is_logged_in()
     }
 
-    pub async fn set_session(&self, session: Session) {
-        self.store.save(&session);
-        *self.session.write().await = session;
-    }
-
     pub async fn clear_session(&self) {
         self.store.delete();
         self.session.write().await.clear();

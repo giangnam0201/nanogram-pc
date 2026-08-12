@@ -28,6 +28,11 @@ pub fn game_share_url(game_id: &str) -> String {
     format!("https://nanogram.app/game/{game_id}")
 }
 
+/// Referral invite link, as produced by the Android invite sheet.
+pub fn invite_url(code: &str) -> String {
+    format!("{INVITE_BASE}{code}")
+}
+
 /// Playable URL for a game bundle.
 pub fn game_play_url(game_id: &str) -> String {
     format!("{GAMES_BASE}{game_id}/game/index.html")
