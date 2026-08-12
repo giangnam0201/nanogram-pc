@@ -52,8 +52,9 @@ jobs:
       - uses: actions/setup-java@v4
         with: { java-version: '21', distribution: 'temurin' }
 
-      - name: Install Gradle
+      - name: Install Gradle & deps
         run: |
+          sudo apt-get update && sudo apt-get install -y dpkg-dev fakeroot rpm
           curl -sL https://services.gradle.org/distributions/gradle-8.12-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
           echo "/tmp/gradle-8.12/bin" >> $GITHUB_PATH
@@ -67,7 +68,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: nanogram-pc-linux
-          path: build/compose/binaries/**/*.deb
+          path: |
+            build/compose/binaries/**/*.deb
+            build/compose/binaries/**/*.rpm
+            build/compose/binaries/**/nanogram-pc*
 
   build-macos:
     name: macOS
@@ -93,7 +97,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: nanogram-pc-macos
-          path: build/compose/binaries/**/*.dmg
+          path: |
+            build/compose/binaries/**/*.dmg
+            build/compose/binaries/**/*.app/**
 
   release:
     name: Release
