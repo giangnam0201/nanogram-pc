@@ -16,7 +16,23 @@ const ALLOWED_HOSTS = new Set([
   'games.nanogram.app',
   'pictures.nanogram.app',
   'nanogram.app',
+  // Feed games. Unsigned, but their CSP allows framing only from
+  // *.nanogram.app, so they must be proxied to be embeddable at all.
+  'be.nanogram.app',
 ]);
+
+/** Unsigned hosts whose HTML may use relative asset paths. */
+const UNSIGNED_HOSTS = new Set(['be.nanogram.app']);
+
+/** Keep relative URLs in proxied HTML resolving against the real origin. */
+function injectBase(html: string, origin: string, pathname: string): string {
+  const dir = pathname.slice(0, pathname.lastIndexOf('/') + 1);
+  const tag = `<base href="${origin}${dir}">`;
+  const head = html.indexOf('<head>');
+  if (head === -1) return tag + html;
+  const at = head + '<head>'.length;
+  return html.slice(0, at) + tag + html.slice(at);
+}
 
 function localName(cfName: string): string {
   return 'ngcf_' + cfName.replace('CloudFront-', '').replace(/-/g, '_').toLowerCase();
@@ -70,12 +86,23 @@ export default async function handler(req: Request): Promise<Response> {
   });
 
   const headers = new Headers();
-  for (const name of ['content-type', 'content-length', 'etag', 'last-modified']) {
+  for (const name of ['content-type', 'etag', 'last-modified']) {
     const value = upstream.headers.get(name);
     if (value) headers.set(name, value);
   }
-  // Signed URLs expire, so never let a shared cache hold these.
+  // Signed URLs expire, so never let a shared cache hold these. Upstream CSP
+  // and X-Frame-Options are deliberately not forwarded: dropping
+  // `frame-ancestors` is the whole reason feed games come through here.
   headers.set('Cache-Control', upstream.ok ? 'private, max-age=300' : 'no-store');
 
+  const contentType = upstream.headers.get('content-type') ?? '';
+  if (contentType.startsWith('text/html') && UNSIGNED_HOSTS.has(upstreamUrl.hostname)) {
+    const html = await upstream.text();
+    const patched = injectBase(html, upstreamUrl.origin, upstreamUrl.pathname);
+    return new Response(patched, { status: upstream.status, headers });
+  }
+
+  const length = upstream.headers.get('content-length');
+  if (length) headers.set('content-length', length);
   return new Response(upstream.body, { status: upstream.status, headers });
 }

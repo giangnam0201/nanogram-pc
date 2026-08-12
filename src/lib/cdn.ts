@@ -9,13 +9,17 @@ import { CDN_PROXY } from './transport.web';
    Web: a serverless function does the same at /api/cdn, using a first-party
    cookie so <img> and <iframe> work without an Authorization header.
 
-   be.nanogram.app is deliberately absent: it sits behind Cloudflare, serves
-   feed games unsigned, and is faster loaded directly. */
+   be.nanogram.app needs no signature, but sets
+   `frame-ancestors 'self' https://*.nanogram.app`, so it is proxied purely to
+   drop that header and make the feed embeddable. */
 
 const PROXIED_HOSTS = new Set([
   'games.nanogram.app',
   'pictures.nanogram.app',
   'nanogram.app',
+  // Unsigned, but its CSP allows framing only from *.nanogram.app, so it has
+  // to come through the proxy to be embeddable at all.
+  'be.nanogram.app',
 ]);
 
 /** Windows serves custom schemes over `http://<scheme>.localhost`. */

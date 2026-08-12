@@ -25,7 +25,36 @@ const ALLOWED_HOSTS: &[&str] = &[
     "games.nanogram.app",
     "pictures.nanogram.app",
     "nanogram.app",
+    // Feed games. These need no signature, but their CSP sets
+    // `frame-ancestors 'self' https://*.nanogram.app`, so the webview cannot
+    // embed them directly — proxying drops that header.
+    "be.nanogram.app",
 ];
+
+/// Hosts that serve unsigned content and may reference assets relatively.
+/// Proxied HTML from these gets a <base> tag so those references still resolve
+/// against the real origin.
+const UNSIGNED_HOSTS: &[&str] = &["be.nanogram.app"];
+
+pub fn needs_base_tag(host: &str) -> bool {
+    UNSIGNED_HOSTS.contains(&host)
+}
+
+/// Insert `<base href>` so relative URLs in proxied HTML keep working.
+pub fn inject_base(html: &str, host: &str, path: &str) -> String {
+    let dir = match path.rfind('/') {
+        Some(i) => &path[..=i],
+        None => "",
+    };
+    let tag = format!("<base href=\"https://{host}/{dir}\">");
+    match html.find("<head>") {
+        Some(i) => {
+            let at = i + "<head>".len();
+            format!("{}{}{}", &html[..at], tag, &html[at..])
+        }
+        None => format!("{tag}{html}"),
+    }
+}
 
 pub fn is_allowed_host(host: &str) -> bool {
     ALLOWED_HOSTS.contains(&host)
@@ -155,6 +184,13 @@ impl Cdn {
                     .unwrap_or("application/octet-stream")
                     .to_string();
                 let body = resp.bytes().await.map(|b| b.to_vec()).unwrap_or_default();
+
+                if content_type.starts_with("text/html") && needs_base_tag(host) {
+                    if let Ok(html) = String::from_utf8(body.clone()) {
+                        let patched = inject_base(&html, host, path_and_query);
+                        return (status, content_type, patched.into_bytes());
+                    }
+                }
                 (status, content_type, body)
             }
             Err(e) => {
@@ -212,8 +248,33 @@ mod tests {
     fn only_nanogram_hosts_are_proxied() {
         assert!(is_allowed_host("games.nanogram.app"));
         assert!(is_allowed_host("pictures.nanogram.app"));
+        assert!(is_allowed_host("be.nanogram.app"));
         assert!(!is_allowed_host("evil.example"));
         assert!(!is_allowed_host("games.nanogram.app.evil.example"));
+    }
+
+    #[test]
+    fn only_unsigned_hosts_get_a_base_tag() {
+        assert!(needs_base_tag("be.nanogram.app"));
+        // Signed hosts must not: relative URLs would bypass the cookie proxy.
+        assert!(!needs_base_tag("games.nanogram.app"));
+    }
+
+    #[test]
+    fn base_tag_points_at_the_asset_directory() {
+        let html = inject_base(
+            "<html><head><title>x</title></head></html>",
+            "be.nanogram.app",
+            "games/abc/assets/index.html",
+        );
+        assert!(html.contains(r#"<base href="https://be.nanogram.app/games/abc/assets/">"#));
+        assert!(html.starts_with("<html><head><base"));
+    }
+
+    #[test]
+    fn base_tag_survives_missing_head() {
+        let html = inject_base("<div>no head</div>", "be.nanogram.app", "a/b.html");
+        assert!(html.starts_with(r#"<base href="https://be.nanogram.app/a/">"#));
     }
 
     #[test]
