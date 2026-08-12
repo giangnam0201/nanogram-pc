@@ -82,12 +82,13 @@ export function CreateScreen() {
         <h1 class="screen-title">{t('create_screen_title')}</h1>
         <span class="spacer" />
         {credits && (
-          <span class="chip">
+          <button class="chip" onClick={() => navigate({ name: 'credits' })}>
             <Icon name="ic_credit_card" size={15} />
             <span style={{ marginLeft: 6 }}>
-              {formatCount(credits.remainingToday ?? credits.bankBalance)} {t('profile_credits')}
+              {formatCount(Math.floor((credits.remainingToday ?? 0) + (credits.bankBalance ?? 0)))}{' '}
+              {t('profile_credits')}
             </span>
-          </span>
+          </button>
         )}
       </div>
 

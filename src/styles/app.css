@@ -987,3 +987,124 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ----------------------------------------------------------- credits --- */
+
+.credit-hero {
+  background: var(--ng-surface);
+  border: 1px solid var(--ng-separator);
+  border-radius: var(--ng-r-xl);
+  padding: var(--ng-space-l);
+  display: grid;
+  gap: 6px;
+  margin-top: var(--ng-space-s);
+}
+
+.credit-total {
+  font: 700 44px/48px var(--ng-font);
+  letter-spacing: -0.015em;
+}
+
+.credit-split {
+  display: flex;
+  gap: var(--ng-space-xl);
+  margin-top: var(--ng-space-xs);
+  flex-wrap: wrap;
+}
+
+.invite-card {
+  margin-top: var(--ng-space-s);
+  padding: var(--ng-space-l);
+  border-radius: var(--ng-r-xl);
+  border: 1px solid var(--ng-separator);
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.invite-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--ng-r-md);
+  background: var(--ng-fill);
+  color: var(--ng-ink);
+  font-weight: 600;
+  transition: background var(--ng-dur-micro) var(--ng-ease);
+}
+
+.invite-link:hover {
+  background: var(--ng-fill-strong);
+}
+
+.earn-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--ng-r-md);
+  background: var(--ng-fill);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.earn-reward {
+  font-weight: 700;
+  color: var(--ng-green);
+  white-space: nowrap;
+}
+
+.delta-up {
+  font-weight: 700;
+  color: var(--ng-green);
+}
+
+.delta-down {
+  font-weight: 700;
+  color: var(--ng-text-secondary);
+}
+
+/* -------------------------------------------------------------- about --- */
+
+.about-card {
+  display: grid;
+  gap: 6px;
+  padding: var(--ng-space-l);
+  border-radius: var(--ng-r-xl);
+  background: var(--ng-surface);
+  border: 1px solid var(--ng-separator);
+  justify-items: center;
+  text-align: center;
+}
+
+.toggle {
+  width: 44px;
+  height: 26px;
+  border-radius: var(--ng-r-pill);
+  background: var(--ng-toggle-off);
+  position: relative;
+  flex: none;
+  transition: background var(--ng-dur-micro) var(--ng-ease);
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--ng-dur-micro) var(--ng-ease);
+  box-shadow: var(--ng-shadow-hairline);
+}
+
+.toggle.is-on {
+  background: var(--ng-ink);
+}
+
+.toggle.is-on::after {
+  transform: translateX(18px);
+}

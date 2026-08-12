@@ -86,6 +86,14 @@ export function ProfileScreen() {
           <Icon name="ic_bell" size={19} />
         </button>
         <button
+          class="chip"
+          onClick={() => navigate({ name: 'credits' })}
+          aria-label={t('credits_title')}
+        >
+          <Icon name="ic_credit_card" size={15} />
+          <span style={{ marginLeft: 6 }}>{t('profile_credits')}</span>
+        </button>
+        <button
           class="icon-btn"
           onClick={() => navigate({ name: 'settings' })}
           aria-label={t('profile_settings')}

@@ -511,3 +511,42 @@ export interface Availability {
   available: boolean;
   code?: string | null;
 }
+
+/* ------------------------------------------------------- credits & co --- */
+
+export interface Achievement {
+  id?: string | null;
+  reward?: number | null;
+  repeatability?: string | null;
+  progress?: number | null;
+  target?: number | null;
+  completed?: boolean | null;
+}
+
+export interface CreditTransaction {
+  id?: string | null;
+  delta?: number | null;
+  kind?: string | null;
+  description?: string | null;
+  createdAt?: string | null;
+  bucket?: string | null;
+}
+
+export interface CreditTransactionsResponse {
+  transactions?: CreditTransaction[] | null;
+  nextCursor?: number | null;
+}
+
+export interface BlockRow {
+  user?: { id?: string | null; username?: string | null; avatarUrl?: string | null } | null;
+  createdAt?: string | null;
+}
+
+export interface NotificationPrefs {
+  pushEnabled: boolean;
+  likesEnabled: boolean;
+  commentsEnabled: boolean;
+  savesEnabled: boolean;
+  followsEnabled: boolean;
+  mentionsEnabled: boolean;
+}

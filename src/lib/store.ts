@@ -18,7 +18,8 @@ export type Route =
   | { name: 'session'; sessionId: string }
   | { name: 'settings' }
   | { name: 'notifications' }
-  | { name: 'leaderboard' };
+  | { name: 'leaderboard' }
+  | { name: 'credits' };
 
 export const route = signal<Route>({ name: 'tab', tab: 'home' });
 const history: Route[] = [];

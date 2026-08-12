@@ -145,8 +145,35 @@ export const profile = {
   block: (userId: string) => request<unknown>({ method: 'POST', path: 'v2/blocks', body: { userId } }),
   unblock: (userId: string) => request<unknown>({ method: 'DELETE', path: `v2/blocks/${userId}` }),
 
-  achievements: () => request<unknown>({ method: 'GET', path: 'v2/me/achievements' }),
+  achievements: () =>
+    request<{ achievements?: T.Achievement[] | null; dailyResetsAt?: string | null }>({
+      method: 'GET',
+      path: 'v2/me/achievements',
+    }),
+
   credits: () => request<T.Credits>({ method: 'GET', path: 'v2/gamegen/credits' }),
+
+  creditHistory: (cursor?: number, limit = 30) =>
+    request<T.CreditTransactionsResponse>({
+      method: 'GET',
+      path: 'credits/transactions',
+      query: { limit, cursor },
+    }),
+
+  blocks: () => request<{ blocks?: T.BlockRow[] | null }>({ method: 'GET', path: 'v2/blocks' }),
+
+  genres: () => request<T.Genre[]>({ method: 'GET', path: 'v2/genres' }),
+  myGenres: () => request<{ genreIds?: string[] | null }>({ method: 'GET', path: 'v2/me/genres' }),
+  setGenres: (genreIds: string[]) =>
+    request<unknown>({ method: 'PUT', path: 'v2/me/genres', body: { genreIds } }),
+
+  notificationPrefs: () =>
+    request<T.NotificationPrefs>({ method: 'GET', path: 'notifications/preferences' }),
+  setNotificationPrefs: (prefs: T.NotificationPrefs) =>
+    request<T.NotificationPrefs>({ method: 'PUT', path: 'notifications/preferences', body: prefs }),
+
+  parentalControls: () =>
+    request<T.ParentalControls>({ method: 'GET', path: 'v2/me/parental-controls' }),
 };
 
 /* ------------------------------------------------------------ comments --- */

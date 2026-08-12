@@ -29,6 +29,7 @@ import { SessionScreen } from './screens/Session';
 import { SettingsScreen } from './screens/Settings';
 import { NotificationsScreen } from './screens/Notifications';
 import { LeaderboardScreen } from './screens/Leaderboard';
+import { CreditsScreen } from './screens/Credits';
 
 function Routes() {
   const r = route.value;
@@ -63,6 +64,8 @@ function Routes() {
       return <NotificationsScreen />;
     case 'leaderboard':
       return <LeaderboardScreen />;
+    case 'credits':
+      return <CreditsScreen />;
   }
 }
 
