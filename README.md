@@ -1,4 +1,4 @@
-# Nanogram for Desktop
+# Nanogram for Desktop and Web
 
 A native desktop client for **Nanogram** — play, create, remix and share instant
 games — for Windows, macOS and Linux.
