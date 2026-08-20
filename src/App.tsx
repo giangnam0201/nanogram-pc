@@ -3,13 +3,16 @@ import { listen } from '@tauri-apps/api/event';
 import {
   loggedIn,
   me,
+  navigate,
   needsOnboarding,
   refreshSession,
   route,
+  toast,
   toasts,
   unreadChats,
   unreadNotifications,
 } from './lib/store';
+import { rooms as roomsApi, roomsAvailable } from './lib/rooms';
 import { notifications as notificationsApi } from './lib/api';
 import { isTauri } from './lib/transport';
 import { NavBar } from './components/NavBar';
@@ -17,6 +20,8 @@ import { FullSpinner } from './components/common';
 import { HomeScreen } from './screens/Home';
 import { DiscoverScreen } from './screens/Discover';
 import { CreateScreen } from './screens/Create';
+import { MultiCreatorScreen } from './screens/MultiCreator';
+import { RoomScreen } from './screens/Room';
 import { InboxScreen } from './screens/Inbox';
 import { ProfileScreen } from './screens/Profile';
 import { LoginScreen } from './screens/Login';
@@ -42,6 +47,8 @@ function Routes() {
           return <DiscoverScreen />;
         case 'create':
           return <CreateScreen />;
+        case 'rooms':
+          return <MultiCreatorScreen />;
         case 'inbox':
           return <InboxScreen />;
         case 'profile':
@@ -58,6 +65,8 @@ function Routes() {
       return <ChatScreen chatId={r.chatId} />;
     case 'session':
       return <SessionScreen sessionId={r.sessionId} />;
+    case 'room':
+      return <RoomScreen roomId={r.roomId} />;
     case 'settings':
       return <SettingsScreen />;
     case 'notifications':
@@ -116,6 +125,25 @@ export function App() {
   useEffect(() => {
     unreadChats.value = me.value?.chatUnreadCount ?? 0;
   }, [me.value?.chatUnreadCount]);
+
+  /* A room invite link (…/?join=ABC123) drops the recipient straight into the
+     room once they are signed in. The code is consumed from the URL either way,
+     so a refresh does not try to re-join. */
+  useEffect(() => {
+    if (!loggedIn.value || needsOnboarding.value || !roomsAvailable) return;
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('join');
+    if (!code) return;
+
+    params.delete('join');
+    const rest = params.toString();
+    window.history.replaceState({}, '', window.location.pathname + (rest ? `?${rest}` : ''));
+
+    void roomsApi
+      .join(code)
+      .then((res) => navigate({ name: 'room', roomId: res.room.id }))
+      .catch((e: unknown) => toast(e instanceof Error ? e.message : 'That invite did not work.', 'error'));
+  }, [loggedIn.value, needsOnboarding.value]);
 
   if (loggedIn.value === null) return <FullSpinner />;
   if (!loggedIn.value) return <LoginScreen />;

@@ -7,7 +7,7 @@ import type { Me } from './types';
 
 /* ------------------------------------------------------------- routing --- */
 
-export type Tab = 'home' | 'discover' | 'create' | 'inbox' | 'profile';
+export type Tab = 'home' | 'discover' | 'create' | 'rooms' | 'inbox' | 'profile';
 
 export type Route =
   | { name: 'tab'; tab: Tab }
@@ -16,6 +16,7 @@ export type Route =
   | { name: 'genre'; genreId: string; title: string }
   | { name: 'chat'; chatId: string }
   | { name: 'session'; sessionId: string }
+  | { name: 'room'; roomId: string }
   | { name: 'settings' }
   | { name: 'notifications' }
   | { name: 'leaderboard' }

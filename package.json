@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "Nanogram for desktop \u2014 Windows, macOS, Linux",
+  "description": "Nanogram for desktop — Windows, macOS, Linux",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@preact/signals": "^2.0.1",
+    "@supabase/realtime-js": "^2.112.3",
     "preact": "^10.26.4"
   },
   "devDependencies": {

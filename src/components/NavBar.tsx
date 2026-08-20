@@ -1,11 +1,13 @@
 import { Icon } from './Icon';
 import { route, switchTab, unreadChats, type Tab } from '../lib/store';
 
-/* Same five destinations as the Android bottom bar, using its own icons. */
+/* The Android bottom bar's five destinations, plus Rooms — the one thing the
+   phone app has no equivalent for. */
 const TABS: { tab: Tab; icon: string; label: string }[] = [
   { tab: 'home', icon: 'ic_navbar_home', label: 'Home' },
   { tab: 'discover', icon: 'ic_navbar_search', label: 'Discover' },
   { tab: 'create', icon: 'ic_navbar_create', label: 'Create' },
+  { tab: 'rooms', icon: 'ic_group_add', label: 'Rooms' },
   { tab: 'inbox', icon: 'ic_navbar_inbox', label: 'Inbox' },
   { tab: 'profile', icon: 'ic_navbar_profile', label: 'Profile' },
 ];
