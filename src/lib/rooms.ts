@@ -78,6 +78,7 @@ export interface RoomDetail {
   styleId: string | null;
   dimension: string | null;
   sessionId: string | null;
+  sessionOwnerId: string | null;
   htmlVersion: number;
   publishedGameId: string | null;
   creditQuota: number;
@@ -172,7 +173,13 @@ export const rooms = {
   chat: (id: string, text: string) => rooms.act<{ event: RoomEvent }>(id, { action: 'chat', text }),
 
   prompt: (id: string, text: string) =>
-    rooms.act<{ mode: 'local' | 'server'; sessionId?: string }>(id, { action: 'prompt', text }),
+    rooms.act<{
+      mode: 'local' | 'server';
+      sessionId?: string;
+      /** Set only when this caller already owns the session holding the latest
+       *  build; otherwise start a fresh one seeded with the room's HTML. */
+      continueSession?: string | null;
+    }>(id, { action: 'prompt', text }),
 
   sync: (id: string) =>
     rooms.act<{ synced: boolean; running?: boolean; htmlVersion?: number }>(id, { action: 'sync' }),

@@ -75,8 +75,11 @@ export interface Room {
   hostName: string;
   styleId: string | null;
   dimension: string | null;
-  /** The host's GameGen session. Only the host's token can drive it. */
+  /** The GameGen session holding the current build. Sessions are single-owner,
+   *  so only `sessionOwnerId` can drive or publish it; anyone else building
+   *  starts their own, seeded from the room's HTML. */
   sessionId: string | null;
+  sessionOwnerId: string | null;
   htmlVersion: number;
   publishedGameId: string | null;
   /** Ceiling on credits this room may spend, set by the host. 0 = unlimited. */
@@ -107,6 +110,7 @@ interface RoomRow {
   style_id: string | null;
   dimension: string | null;
   session_id: string | null;
+  session_owner_id: string | null;
   html_version: number;
   published_game_id: string | null;
   credit_quota: number;
@@ -126,6 +130,7 @@ function toRoom(row: RoomRow): Room {
     styleId: row.style_id,
     dimension: row.dimension,
     sessionId: row.session_id,
+    sessionOwnerId: row.session_owner_id,
     htmlVersion: row.html_version,
     publishedGameId: row.published_game_id,
     creditQuota: row.credit_quota,
@@ -252,6 +257,7 @@ export async function createRoom(
     styleId: input.styleId ?? null,
     dimension: input.dimension ?? null,
     sessionId: null,
+    sessionOwnerId: null,
     htmlVersion: 0,
     publishedGameId: null,
     creditQuota: quota,
@@ -287,6 +293,7 @@ export async function saveRoom(room: Room): Promise<void> {
       style_id: room.styleId,
       dimension: room.dimension,
       session_id: room.sessionId,
+      session_owner_id: room.sessionOwnerId,
       html_version: room.htmlVersion,
       published_game_id: room.publishedGameId,
       credit_quota: room.creditQuota,

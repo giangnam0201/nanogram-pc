@@ -36,6 +36,11 @@ create table if not exists public.rooms (
 
 create index if not exists rooms_expires_at_idx on public.rooms (expires_at);
 
+-- Added after the first release: GameGen sessions belong to whoever created
+-- them, so the room has to remember whose session produced the current build.
+-- Only that person's token can drive or publish it.
+alter table public.rooms add column if not exists session_owner_id text;
+
 -- -------------------------------------------------------------- members ---
 
 create table if not exists public.room_members (

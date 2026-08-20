@@ -64,6 +64,7 @@ async function state(room: Room, since: number, includeHtml: boolean) {
       styleId: room.styleId,
       dimension: room.dimension,
       sessionId: room.sessionId,
+      sessionOwnerId: room.sessionOwnerId,
       htmlVersion: room.htmlVersion,
       publishedGameId: room.publishedGameId,
       creditQuota: room.creditQuota,
@@ -167,18 +168,19 @@ export default async function handler(req: Request): Promise<Response> {
 
         const offline = await canBuildOffline(room);
         if (!offline) {
-          if (!isHost) {
-            return json(
-              {
-                error: `Only @${room.hostName} can build here right now. Ask them to turn on “keep building while I’m away”.`,
-              },
-              409,
-            );
-          }
-          // The host's own browser drives it and posts a snapshot back. The
-          // build-start still has to be broadcast from here: without it the
-          // other members see the prompt and then nothing at all until the
-          // finished snapshot lands, with no sign a build is even running.
+          /* Anyone in the room can build. GameGen sessions are single-owner, so
+             a member cannot drive the session someone else created — but
+             createSession accepts remixHtml, so they can continue the same game
+             in a session of their own, seeded with the room's current build.
+             The room's real state is the HTML snapshot, not the session, so the
+             game carries forward intact and each person spends their own
+             credits. `continueSession` is set only when the caller already owns
+             the session holding the latest build. */
+          const canContinue = Boolean(room.sessionId && room.sessionOwnerId === me.id);
+
+          // Broadcast build-start from here: without it the other members see
+          // the prompt and then nothing at all until the finished snapshot
+          // lands, with no sign a build is even running.
           await appendEvent(room.id, {
             type: 'build-start',
             actorId: me.id,
@@ -186,7 +188,10 @@ export default async function handler(req: Request): Promise<Response> {
             actorAvatar: me.avatarUrl,
             text,
           });
-          return json({ mode: 'local' });
+          return json({
+            mode: 'local',
+            continueSession: canContinue ? room.sessionId : null,
+          });
         }
 
         const token = await delegatedAccessToken(room.id);
@@ -202,6 +207,8 @@ export default async function handler(req: Request): Promise<Response> {
           });
           sessionId = created.id;
           room.sessionId = sessionId;
+          // Created with the host's token, so the host owns it.
+          room.sessionOwnerId = room.hostId;
           await saveRoom(room);
         }
 
@@ -256,23 +263,27 @@ export default async function handler(req: Request): Promise<Response> {
          an unrecorded session is orphaned and the next attempt pays to create
          another one. */
       case 'session': {
-        if (!isHost) return json({ error: 'only the host can set the session' }, 403);
         const sessionId = String(body.sessionId ?? '');
         if (!sessionId) return json({ error: 'missing sessionId' }, 400);
+        // Whoever created it owns it — only their token can drive or publish it.
         room.sessionId = sessionId;
+        room.sessionOwnerId = me.id;
         await saveRoom(room);
         return json({ ok: true });
       }
 
       /* The host's browser finished a local build and hands the result back. */
       case 'snapshot': {
-        if (!isHost) return json({ error: 'only the host can post builds' }, 403);
+        // Any member may post a build: that is what building together means.
         const html = typeof body.html === 'string' ? body.html : '';
         if (!html) return json({ error: 'missing html' }, 400);
 
         await setHtml(room.id, html);
         room.htmlVersion += 1;
-        if (typeof body.sessionId === 'string') room.sessionId = body.sessionId;
+        if (typeof body.sessionId === 'string') {
+          room.sessionId = body.sessionId;
+          room.sessionOwnerId = me.id;
+        }
         if (typeof body.title === 'string' && body.title.trim()) room.title = body.title.trim();
         await saveRoom(room);
         await noteCreditSpent(room.id);

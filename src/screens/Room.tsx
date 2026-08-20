@@ -265,7 +265,7 @@ export function RoomScreen({ roomId }: { roomId: string }) {
           avatar: me.value?.avatarUrl ?? null,
           prompt: text,
         });
-        if (res.mode === 'local') await runLocalBuild(text);
+        if (res.mode === 'local') await runLocalBuild(text, res.continueSession ?? null);
       }
     } catch (e) {
       setDraft(text);
@@ -276,11 +276,20 @@ export function RoomScreen({ roomId }: { roomId: string }) {
     }
   }
 
-  /** Host path: drive GameGen from this browser, then hand the result back. */
-  async function runLocalBuild(text: string) {
+  /**
+   * Drive GameGen from this browser, then hand the result back to the room.
+   *
+   * `continueSession` is set only when this person already owns the session
+   * holding the latest build. Otherwise a new session is created seeded with
+   * the room's current HTML — GameGen sessions are single-owner, so this is how
+   * someone else picks the game up and keeps going without the original builder
+   * being present. The room's canonical state is the snapshot, not the session,
+   * so the game carries forward and everyone spends their own credits.
+   */
+  async function runLocalBuild(text: string, continueSession: string | null) {
     if (!state) return;
     try {
-      let sessionId = state.room.sessionId;
+      let sessionId = continueSession;
       if (!sessionId) {
         const created = await gamegen.createSession({
           styleId: state.room.styleId ?? '',
@@ -291,7 +300,15 @@ export function RoomScreen({ roomId }: { roomId: string }) {
         sessionId = created.id;
         // Persist immediately: a failed build must not orphan a paid-for session.
         await roomsApi.setSession(roomId, sessionId).catch(() => {});
-        setState((prev) => (prev ? { ...prev, room: { ...prev.room, sessionId } } : prev));
+        const owned = sessionId;
+        setState((prev) =>
+          prev
+            ? {
+                ...prev,
+                room: { ...prev.room, sessionId: owned, sessionOwnerId: me.value?.id ?? null },
+              }
+            : prev,
+        );
       }
       await gamegen.sendMessage(sessionId, text);
 
@@ -334,11 +351,11 @@ export function RoomScreen({ roomId }: { roomId: string }) {
   const online = members.filter((m) => m.online);
   const quotaLeft = state.room.creditQuota > 0 ? state.room.creditQuota - state.creditsSpent : null;
 
-  /* Derived from the live member list, not from `state`. `state` is the snapshot
-     taken when the room was opened and is never refetched, so reading
-     `state.hostOnline` reported the host as away for the rest of the session —
-     including to the host themselves. Presence frames keep `members` current. */
-  const hostOnline = members.some((m) => m.isHost && m.online);
+  /* Derived from the live member list rather than from `state`, which is the
+     snapshot taken when the room was opened and never refetched. */
+  const canPublish = Boolean(
+    identityKnown && state.room.sessionOwnerId && state.room.sessionOwnerId === me.value?.id,
+  );
 
   return (
     <div class="room">
@@ -369,7 +386,10 @@ export function RoomScreen({ roomId }: { roomId: string }) {
         {/* In the header rather than over the preview: on a phone only one pane
             renders at a time, so a control living inside the preview is simply
             missing until you happen to switch tabs. Session.tsx does the same. */}
-        {isHost && html && (
+        {/* Publishing runs against the GameGen session, and sessions are
+            single-owner — so it is offered to whoever owns the current build,
+            which is not necessarily the host. */}
+        {canPublish && html && (
           <button
             class="btn btn-primary btn-sm room-publish"
             onClick={() => setPublishOpen(true)}
@@ -482,11 +502,10 @@ export function RoomScreen({ roomId }: { roomId: string }) {
               </button>
             </form>
 
-            {mode === 'build' && !state.canBuildOffline && identityKnown && !isHost && (
+            {mode === 'build' && identityKnown && !state.canBuildOffline && !canPublish && (
               <p class="room-hint">
-                Only @{state.room.hostName} can build here right now
-                {hostOnline ? '' : ' — and they are offline'}. They can turn on “keep
-                building while I’m away” in room settings.
+                Building picks up from the room's current game and uses your own
+                credits.
               </p>
             )}
           </div>
@@ -762,12 +781,20 @@ function RoomSettingsSheet({
           Save
         </Button>
 
-        <div class="divider">Building while you are away</div>
+        <div class="divider">Put builds on your credits</div>
+
+        <p class="field-hint">
+          Everyone in the room can already build — each build continues the
+          room's current game in that person's own session, on their own
+          credits. This option is separate: it makes builds run on{' '}
+          <strong>your</strong> session and your credits instead, so the room
+          shares one AI conversation rather than a chain of remixes.
+        </p>
 
         {!state.delegationAvailable ? (
           <p class="field-hint">
-            This deployment has no <code>ROOM_DELEGATION_KEY</code> set, so credentials cannot be
-            stored safely and offline building is disabled.
+            Unavailable: this deployment has no <code>ROOM_DELEGATION_KEY</code> set, so a
+            sign-in cannot be stored safely. Building still works for everyone without it.
           </p>
         ) : armed ? (
           <>
@@ -782,8 +809,8 @@ function RoomSettingsSheet({
         ) : (
           <>
             <p class="field-hint">
-              Lets anyone in the room keep building when you are not here, spending your credits up
-              to the limit above. Your sign-in is encrypted before it is stored and deleted when you
+              Builds will run on your session and your credits, up to the limit above, even when
+              you are not here. Your sign-in is encrypted before it is stored and deleted when you
               turn this off. Only do this in a room you trust.
             </p>
             <div class="hstack">
@@ -800,7 +827,7 @@ function RoomSettingsSheet({
             </div>
             <Button full onClick={() => void arm()} loading={busy}>
               <Icon name="ic_auto_awesome" size={15} />
-              Let the room build without me
+              Put the room's builds on my credits
             </Button>
           </>
         )}
