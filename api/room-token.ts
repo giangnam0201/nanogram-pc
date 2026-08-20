@@ -14,7 +14,7 @@
  */
 
 import { fail, identify, json } from './_lib/auth';
-import { hasRealtime, mintRealtimeToken, supabaseUrl } from './_lib/db';
+import { anonKey, hasRealtime, mintRealtimeToken, realtimeUrl } from './_lib/db';
 import { getMember, getRoom } from './_lib/rooms';
 
 export const config = { runtime: 'edge' };
@@ -42,7 +42,11 @@ export default async function handler(req: Request): Promise<Response> {
     const { token, expiresAt } = await mintRealtimeToken(me.id, TOKEN_TTL_SECONDS);
     return json({
       available: true,
-      url: supabaseUrl(),
+      // Already ws-scheme; the realtime client does not convert http for us.
+      url: realtimeUrl(),
+      // Safe to publish: row level security still gates everything, and the
+      // caller's actual identity comes from the token below.
+      anonKey: anonKey(),
       token,
       expiresAt,
       // The channel a client should join for this room.

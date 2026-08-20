@@ -276,11 +276,11 @@ export function streamRoom(roomId: string, opts: StreamOptions): () => void {
     }
     if (stopped) return;
 
-    if (creds?.available && creds.url && creds.token && opts.me) {
+    if (creds?.available && creds.url && creds.anonKey && creds.token && opts.me) {
       const { subscribeRoom } = await import('./realtime');
       if (stopped) return;
       stopInner = subscribeRoom(
-        { url: creds.url, token: creds.token },
+        { url: creds.url, anonKey: creds.anonKey, token: creds.token },
         roomId,
         opts.me,
         {

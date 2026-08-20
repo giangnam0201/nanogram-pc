@@ -3,12 +3,14 @@
  *   GET /api/room-health
  *
  * Says which pieces are configured and whether they actually work, so a broken
- * deployment can be diagnosed without reading logs or guessing. Requires a
- * valid Nanogram sign-in: the answers describe the deployment's internals, and
- * that is not something to hand out anonymously.
+ * deployment can be diagnosed without reading logs or guessing.
  *
- * Never returns a secret, or any part of one — only whether each is present and
- * what happened when it was used.
+ * Openable in a browser address bar, because that is how anyone actually
+ * reaches for it. Signed out it answers pass/fail only; signed in it adds the
+ * detail — project URL, which kind of key is installed, the exact database
+ * error — since that describes the deployment's internals.
+ *
+ * Never returns a secret, or any part of one.
  */
 
 import { fail, identify, json } from './_lib/auth';
@@ -48,17 +50,32 @@ function describeKey(key: string | undefined): string {
 
 export default async function handler(req: Request): Promise<Response> {
   try {
-    await identify(req);
+    // Signed in is better, but not required — a config check nobody can open is
+    // not much of a config check.
+    let signedIn = false;
+    try {
+      await identify(req);
+      signedIn = true;
+    } catch {
+      /* anonymous: pass/fail only */
+    }
 
     const checks: Record<string, Check> = {};
 
-    checks.nanogramAuth = { ok: true, detail: 'your token verified against v2/me' };
+    checks.nanogramAuth = {
+      ok: signedIn,
+      detail: signedIn
+        ? 'your token verified against v2/me'
+        : 'not signed in — open this from the app, or sign in, for full detail',
+    };
 
     checks.supabaseConfigured = {
       ok: hasSupabase,
-      detail: hasSupabase
-        ? `${supabaseUrl()} · ${describeKey(process.env.SUPABASE_SERVICE_ROLE_KEY)}`
-        : 'SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY missing — rooms are using the in-memory fallback, which cannot work on a real deployment',
+      detail: !hasSupabase
+        ? 'SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY missing — rooms are using the in-memory fallback, which cannot work on a real deployment'
+        : signedIn
+          ? `${supabaseUrl()} · ${describeKey(process.env.SUPABASE_SERVICE_ROLE_KEY)}`
+          : 'configured',
     };
 
     // Does the key actually reach the schema? Catches a wrong key, a project
@@ -69,20 +86,30 @@ export default async function handler(req: Request): Promise<Response> {
         checks.database = { ok: true, detail: 'rooms table reachable' };
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
+        const missingSchema = /does not exist|relation/i.test(message);
         checks.database = {
           ok: false,
-          detail: /does not exist|relation/i.test(message)
-            ? `schema not installed — run supabase/schema.sql (${message})`
-            : message,
+          detail: !signedIn
+            ? missingSchema
+              ? 'schema not installed — run supabase/schema.sql'
+              : 'could not reach the rooms table'
+            : missingSchema
+              ? `schema not installed — run supabase/schema.sql (${message})`
+              : message,
         };
       }
     }
 
+    const missingRealtime: string[] = [];
+    if (!process.env.SUPABASE_JWT_SECRET) missingRealtime.push('SUPABASE_JWT_SECRET');
+    if (!process.env.SUPABASE_ANON_KEY && !process.env.SUPABASE_PUBLISHABLE_KEY) {
+      missingRealtime.push('SUPABASE_ANON_KEY');
+    }
     checks.realtime = {
       ok: hasRealtime,
       detail: hasRealtime
-        ? 'SUPABASE_JWT_SECRET present'
-        : 'SUPABASE_JWT_SECRET missing — clients fall back to the SSE endpoint, which still works but polls',
+        ? 'JWT secret and project API key both present'
+        : `${missingRealtime.join(' and ')} missing — clients fall back to the SSE endpoint, which still works but polls`,
     };
 
     if (hasRealtime) {
@@ -95,7 +122,7 @@ export default async function handler(req: Request): Promise<Response> {
       } catch (e) {
         checks.realtimeToken = {
           ok: false,
-          detail: e instanceof Error ? e.message : String(e),
+          detail: signedIn ? (e instanceof Error ? e.message : String(e)) : 'could not sign a token',
         };
       }
     }

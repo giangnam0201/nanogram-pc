@@ -24,7 +24,11 @@ import type { RoomEvent, RoomMember } from './rooms';
 
 export interface RealtimeCreds {
   available: boolean;
+  /** Already ws-scheme, ending in /realtime/v1. */
   url?: string;
+  /** Project API key. Authorises the connection, not the person. */
+  anonKey?: string;
+  /** Short-lived JWT carrying the verified Nanogram id. Authorises the person. */
   token?: string;
   expiresAt?: number;
   topic?: string;
@@ -80,15 +84,21 @@ export interface RealtimeHandlers {
  * person online without any of it being written down.
  */
 export function subscribeRoom(
-  creds: Required<Pick<RealtimeCreds, 'url' | 'token'>>,
+  creds: Required<Pick<RealtimeCreds, 'url' | 'anonKey' | 'token'>>,
   roomId: string,
   me: PresenceMeta,
   handlers: RealtimeHandlers,
 ): () => void {
   let stopped = false;
 
-  const client = new RealtimeClient(`${creds.url}/realtime/v1`, {
-    params: { apikey: creds.token, eventsPerSecond: 20 },
+  /* Two different credentials, and they are not interchangeable:
+       apikey    the project's publishable key — authorises the connection
+       setAuth   our minted JWT — authorises the person, and is what the RLS
+                 policies read `ng_user` from
+     Passing the minted token as apikey is rejected by the gateway, which
+     surfaces as a channel that never subscribes and retries forever. */
+  const client = new RealtimeClient(creds.url, {
+    params: { apikey: creds.anonKey, eventsPerSecond: 20 },
   });
   client.setAuth(creds.token);
 

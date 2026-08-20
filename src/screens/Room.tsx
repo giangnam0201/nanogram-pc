@@ -244,7 +244,19 @@ export function RoomScreen({ roomId }: { roomId: string }) {
     setDraft('');
     try {
       if (mode === 'say') {
-        await roomsApi.chat(roomId, text);
+        // Render the sent message from the response rather than waiting for it
+        // to come back round the stream. Otherwise a stalled subscription looks
+        // exactly like chat being broken, including to the sender. The seq
+        // de-dupe means the echo is harmless when the stream is healthy.
+        const { event } = await roomsApi.chat(roomId, text);
+        if (event) {
+          seqRef.current = Math.max(seqRef.current, event.seq);
+          setEvents((prev) =>
+            prev.some((e) => e.seq === event.seq)
+              ? prev
+              : [...prev, event].sort((a, b) => a.seq - b.seq),
+          );
+        }
       } else {
         const res = await roomsApi.prompt(roomId, text);
         setBuild({

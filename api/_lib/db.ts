@@ -18,10 +18,26 @@
 const URL_ENV = process.env.SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
+/* Realtime authenticates the *connection* with a project API key and the *user*
+   with a JWT. They are not interchangeable: the gateway rejects a minted user
+   token supplied as apikey. The Vercel-Supabase integration provides this as
+   SUPABASE_ANON_KEY; a new-style publishable key works equally well. */
+const ANON_KEY = process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY;
 
 export const hasSupabase = Boolean(URL_ENV && SERVICE_KEY);
-/** Realtime additionally needs the JWT secret to authorise subscriptions. */
-export const hasRealtime = Boolean(hasSupabase && JWT_SECRET);
+/** Realtime needs the JWT secret (to authorise the user) and a project API key
+ *  (to authorise the connection). Missing either means falling back to SSE. */
+export const hasRealtime = Boolean(hasSupabase && JWT_SECRET && ANON_KEY);
+
+export function anonKey(): string {
+  return ANON_KEY ?? '';
+}
+
+/** Realtime speaks WebSocket, so the endpoint must carry a ws scheme — the
+ *  client's own helper only converts in the other direction. */
+export function realtimeUrl(): string {
+  return `${supabaseUrl()}/realtime/v1`.replace(/^http/i, 'ws');
+}
 
 export function supabaseUrl(): string {
   return (URL_ENV ?? '').replace(/\/$/, '');
