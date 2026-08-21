@@ -18,7 +18,9 @@ import { cmd, getJson, setJson } from './store';
 import { decryptSecret, encryptSecret } from './crypto';
 import {
   clearUserToken,
+  getUserSession,
   getUserToken,
+  saveUserAccessToken,
   saveUserToken,
   type Room,
 } from './rooms';
@@ -69,16 +71,34 @@ async function refreshPair(refreshToken: string): Promise<TokenPair> {
  * disturb that person's own session, so it is done as rarely as possible.
  */
 export async function accessTokenForUser(userId: string): Promise<string> {
-  const cached = await getJson<{ token: string }>(`accesstoken:${userId}`);
-  if (cached?.token) {
-    const exp = expiresAt(cached.token);
-    if (exp === null || Date.now() / 1000 + 90 < exp) return cached.token;
+  const session = await getUserSession(userId);
+  if (!session) throw new DelegationFailed('no stored sign-in for that account');
+
+  // A cached access token costs nothing and, crucially, does not rotate.
+  if (session.accessTokenEnc && session.accessExpiresAt) {
+    if (Date.parse(session.accessExpiresAt) - 90_000 > Date.now()) {
+      const cached = await decryptSecret(session.accessTokenEnc);
+      if (cached) return cached;
+    }
   }
 
-  const stored = await getUserToken(userId);
-  if (!stored) throw new DelegationFailed('no stored sign-in for that account');
+  /* A row with no link secret was stored before rotation was handled. Its
+     browser is still refreshing on its own, so refreshing here too would retire
+     the token underneath it and sign that person out within minutes — which is
+     precisely the damage this whole mechanism exists to stop.
 
-  const refreshToken = await decryptSecret(stored);
+     Such a row can never be used safely, so drop it. The browser re-links on
+     its next load and comes back with a secret, after which the server is the
+     only refresher and this cannot recur. Until then the room falls back to
+     each member building in their own session. */
+  if (!session.secretHash) {
+    await clearUserToken(userId);
+    throw new DelegationFailed(
+      'that sign-in was stored before token rotation was handled; it will re-link on next load',
+    );
+  }
+
+  const refreshToken = await decryptSecret(session.refreshTokenEnc);
   if (!refreshToken) {
     // Key rotated, or the blob is corrupt. Either way it can never be used.
     await clearUserToken(userId);
@@ -93,14 +113,16 @@ export async function accessTokenForUser(userId: string): Promise<string> {
     throw e;
   }
 
-  // Persist the rotated refresh token, or the next refresh fails.
+  /* Nanogram rotates: the token just used is now dead, so the new one must be
+     stored or every later refresh fails. The browser never refreshes once it
+     has linked, so this row is the only living copy of the session. */
   if (pair.refreshToken !== refreshToken) {
     await saveUserToken(userId, await encryptSecret(pair.refreshToken));
   }
 
   const exp = expiresAt(pair.accessToken);
-  const ttl = exp ? Math.max(60, Math.floor(exp - Date.now() / 1000 - 60)) : 600;
-  await setJson(`accesstoken:${userId}`, { token: pair.accessToken }, ttl);
+  const expiresIso = new Date(exp ? exp * 1000 : Date.now() + 600_000).toISOString();
+  await saveUserAccessToken(userId, await encryptSecret(pair.accessToken), expiresIso);
   return pair.accessToken;
 }
 

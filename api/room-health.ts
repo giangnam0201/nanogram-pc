@@ -112,6 +112,7 @@ export default async function handler(req: Request): Promise<Response> {
         ['rooms.session_owner_id', 'rooms?select=session_owner_id&limit=1'],
         ['room_events.options', 'room_events?select=options&limit=1'],
         ['user_tokens', 'user_tokens?select=user_id&limit=1'],
+        ['user_tokens.secret_hash', 'user_tokens?select=secret_hash&limit=1'],
       ];
       for (const [name, query] of probes) {
         const [table, qs] = query.split('?');

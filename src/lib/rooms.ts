@@ -8,6 +8,7 @@
 
 import { ipc } from './ipc';
 import { isTauri } from './transport';
+import { saveRoomLink } from './transport.web';
 // Types only — erased at build time. The realtime client itself is imported
 // dynamically in streamRoom so its ~16KB never loads for someone who does not
 // open a room.
@@ -219,11 +220,31 @@ export const rooms = {
       hours,
     }),
 
-  revoke: (id: string) => rooms.act(id, { action: 'revoke' }),
+  revoke: async (id: string) => {
+    const res = await rooms.act(id, { action: 'revoke' });
+    // The browser goes back to refreshing for itself.
+    saveRoomLink(null);
+    return res;
+  },
 
-  /** Store this account's sign-in so rooms it owns can build server-side. */
-  linkToken: (refreshToken: string) =>
-    call<{ linked: boolean }>('/link-token', { method: 'POST', body: { refreshToken } }),
+  /**
+   * Store this account's sign-in so rooms it owns can build server-side.
+   *
+   * The server answers with a secret this browser keeps. From that point the
+   * server is the only party that refreshes the session — Nanogram rotates
+   * refresh tokens, so two refreshers means whichever goes second is signed
+   * out. transport.web.ts uses the secret to ask for access tokens instead.
+   */
+  linkToken: async (refreshToken: string) => {
+    const res = await call<{ linked: boolean; secret?: string; userId?: string }>('/link-token', {
+      method: 'POST',
+      body: { refreshToken },
+    });
+    if (res.secret && res.userId) {
+      saveRoomLink({ userId: res.userId, secret: res.secret });
+    }
+    return res;
+  },
 
   tokenLinked: () => call<{ linked: boolean; available: boolean }>('/link-token'),
 

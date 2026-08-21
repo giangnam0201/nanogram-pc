@@ -110,6 +110,24 @@ create table if not exists public.user_tokens (
   updated_at         timestamptz not null default now()
 );
 
+-- Nanogram rotates refresh tokens: refreshing retires the token used, so two
+-- parties holding the same one cannot both survive. Once a token is stored
+-- here the server becomes the only party allowed to refresh it, and the
+-- browser asks the server for access tokens instead of Nanogram. This is the
+-- shared secret that lets a browser prove which stored session is its own —
+-- only its SHA-256 is kept, so the row cannot be used to mint one.
+alter table public.user_tokens add column if not exists secret_hash text;
+alter table public.user_tokens add column if not exists access_token_enc text;
+alter table public.user_tokens add column if not exists access_expires_at timestamptz;
+
+-- Rows stored before the above existed carry no secret, so their browser is
+-- still refreshing independently. Using one would retire the token underneath
+-- that browser and sign the person out within minutes, so they are unusable by
+-- design and deleted here. Each affected browser re-links on its next load and
+-- comes back with a secret. Safe to re-run: every row written since always has
+-- one.
+delete from public.user_tokens where secret_hash is null;
+
 -- ----------------------------------------------------------- delegation ---
 
 -- The host's Nanogram refresh token, AES-256-GCM encrypted by the API before

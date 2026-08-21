@@ -63,10 +63,83 @@ function accessExpired(session: StoredSession, skewSecs = 60): boolean {
 /** Single-flight refresh, matching the desktop client. */
 let refreshing: Promise<void> | null = null;
 
+/* Once this browser has linked its sign-in for Multi-Creator, the server holds
+   the session and is the only party allowed to refresh it.
+
+   Nanogram rotates refresh tokens: refreshing retires the token used. If both
+   the server and this browser refreshed, whichever went second would present a
+   retired token and be signed out — which, with a short access-token lifetime,
+   happens within minutes. So when a link exists we ask the server for an access
+   token instead of refreshing here, and there is exactly one refresher.
+
+   Falls through to the normal flow if the link is gone or unreachable. */
+const LINK_KEY = 'nanogram.roomLink';
+
+interface RoomLink {
+  userId: string;
+  secret: string;
+}
+
+export function saveRoomLink(link: RoomLink | null) {
+  if (link) localStorage.setItem(LINK_KEY, JSON.stringify(link));
+  else localStorage.removeItem(LINK_KEY);
+}
+
+function loadRoomLink(): RoomLink | null {
+  try {
+    const raw = localStorage.getItem(LINK_KEY);
+    if (!raw) return null;
+    const link = JSON.parse(raw) as RoomLink;
+    return link.userId && link.secret ? link : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Ask the server for an access token from the session it holds. */
+async function refreshViaServer(link: RoomLink): Promise<boolean> {
+  const base = (import.meta.env.VITE_ROOMS_API ?? '/api').replace(/\/$/, '');
+  let res: Response;
+  try {
+    res = await fetch(`${base}/session-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(link),
+    });
+  } catch {
+    return false; // offline or endpoint missing — fall back
+  }
+
+  if (res.status === 401 || res.status === 404) {
+    // The stored session is gone; this browser must sign in again properly.
+    saveRoomLink(null);
+    return false;
+  }
+  if (!res.ok) return false;
+
+  const body = (await res.json().catch(() => ({}))) as { accessToken?: string };
+  if (!body.accessToken) return false;
+
+  const session = load();
+  save({
+    accessToken: body.accessToken,
+    // Deliberately left as-is: the server owns rotation now, and overwriting
+    // this with a stale value would break the link if it is ever needed again.
+    refreshToken: session.refreshToken ?? null,
+    userId: session.userId ?? link.userId,
+  });
+  void primeCdnSession();
+  return true;
+}
+
 async function refresh(): Promise<void> {
   if (refreshing) return refreshing;
   refreshing = (async () => {
     const session = load();
+
+    const link = loadRoomLink();
+    if (link && (await refreshViaServer(link))) return;
+
     if (!session.refreshToken) throw apiError('unauthorized', 401, 'not authenticated');
 
     const res = await fetch(`${API_BASE}auth/refresh`, {
@@ -234,6 +307,9 @@ export const webTransport: Transport = {
       }
     }
     clear();
+    // The room link points at a session that no longer exists, and leaving it
+    // behind would hand the next person to use this browser someone else's.
+    saveRoomLink(null);
   },
 
   async gameUrl(gameId) {

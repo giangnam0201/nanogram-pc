@@ -644,34 +644,97 @@ export async function setDelegation(roomId: string, delegation: Delegation): Pro
 interface TokenRow {
   user_id: string;
   refresh_token_enc: string;
+  secret_hash: string | null;
+  access_token_enc: string | null;
+  access_expires_at: string | null;
   updated_at: string;
 }
 
-export async function saveUserToken(userId: string, encrypted: string): Promise<void> {
+export interface StoredSession {
+  refreshTokenEnc: string;
+  secretHash: string | null;
+  accessTokenEnc: string | null;
+  accessExpiresAt: string | null;
+}
+
+export async function saveUserToken(
+  userId: string,
+  encrypted: string,
+  secretHash?: string | null,
+): Promise<void> {
+  const row: Record<string, unknown> = {
+    user_id: userId,
+    refresh_token_enc: encrypted,
+    updated_at: new Date().toISOString(),
+  };
+  // Undefined means "leave whatever is there": a server-side refresh rewrites
+  // the token without touching the browser's secret.
+  if (secretHash !== undefined) row.secret_hash = secretHash;
+
   if (hasSupabase) {
     await sb('user_tokens', {
       method: 'POST',
       prefer: 'resolution=merge-duplicates',
-      body: {
-        user_id: userId,
-        refresh_token_enc: encrypted,
-        updated_at: new Date().toISOString(),
-      },
+      body: row,
     });
     return;
   }
-  await setJson(`usertoken:${userId}`, { refresh_token_enc: encrypted }, ROOM_TTL);
+  const existing = await getJson<StoredSession>(`usertoken:${userId}`);
+  await setJson(
+    `usertoken:${userId}`,
+    {
+      refreshTokenEnc: encrypted,
+      secretHash: secretHash === undefined ? (existing?.secretHash ?? null) : secretHash,
+      accessTokenEnc: existing?.accessTokenEnc ?? null,
+      accessExpiresAt: existing?.accessExpiresAt ?? null,
+    } satisfies StoredSession,
+    ROOM_TTL,
+  );
 }
 
-export async function getUserToken(userId: string): Promise<string | null> {
+/** Cache the derived access token so the browser can be handed one without a
+ *  refresh, which is the operation that rotates and would break the session. */
+export async function saveUserAccessToken(
+  userId: string,
+  encrypted: string,
+  expiresAt: string,
+): Promise<void> {
+  if (hasSupabase) {
+    await sb('user_tokens', {
+      method: 'PATCH',
+      query: `user_id=eq.${encodeURIComponent(userId)}`,
+      body: { access_token_enc: encrypted, access_expires_at: expiresAt },
+    });
+    return;
+  }
+  const existing = await getJson<StoredSession>(`usertoken:${userId}`);
+  if (!existing) return;
+  await setJson(
+    `usertoken:${userId}`,
+    { ...existing, accessTokenEnc: encrypted, accessExpiresAt: expiresAt },
+    ROOM_TTL,
+  );
+}
+
+export async function getUserSession(userId: string): Promise<StoredSession | null> {
   if (hasSupabase) {
     const row = await sbOne<TokenRow>('user_tokens', {
       query: `user_id=eq.${encodeURIComponent(userId)}&select=*`,
     });
-    return row?.refresh_token_enc ?? null;
+    return row
+      ? {
+          refreshTokenEnc: row.refresh_token_enc,
+          secretHash: row.secret_hash,
+          accessTokenEnc: row.access_token_enc,
+          accessExpiresAt: row.access_expires_at,
+        }
+      : null;
   }
-  const stored = await getJson<{ refresh_token_enc?: string }>(`usertoken:${userId}`);
-  return stored?.refresh_token_enc ?? null;
+  return getJson<StoredSession>(`usertoken:${userId}`);
+}
+
+export async function getUserToken(userId: string): Promise<string | null> {
+  return (await getUserSession(userId))?.refreshTokenEnc ?? null;
 }
 
 export async function clearUserToken(userId: string): Promise<void> {

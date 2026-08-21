@@ -82,3 +82,24 @@ export async function decryptSecret(blob: string): Promise<string | null> {
     return null;
   }
 }
+
+/**
+ * SHA-256 of a shared secret, hex encoded.
+ *
+ * Used for the link secret a browser proves itself with: storing only the hash
+ * means the stored row cannot be turned back into a working credential.
+ */
+export async function hashSecret(secret: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/** A fresh link secret. Long enough that guessing is hopeless. */
+export function newSecret(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}

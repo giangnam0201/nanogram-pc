@@ -18,7 +18,7 @@
  */
 
 import { fail, identify, json } from './_lib/auth';
-import { canDelegate, encryptSecret } from './_lib/crypto';
+import { canDelegate, encryptSecret, hashSecret, newSecret } from './_lib/crypto';
 import { clearUserToken, getUserToken, saveUserToken } from './_lib/rooms';
 
 export const config = { runtime: 'edge' };
@@ -55,8 +55,14 @@ export default async function handler(req: Request): Promise<Response> {
     const refreshToken = String(body.refreshToken ?? '').trim();
     if (!refreshToken) return json({ error: 'missing refresh token' }, 400);
 
-    await saveUserToken(me.id, await encryptSecret(refreshToken));
-    return json({ linked: true });
+    /* Issue a secret the browser keeps. From here on the server is the only
+       party that refreshes this session — Nanogram rotates refresh tokens, so
+       if the browser kept refreshing too, whichever went second would find its
+       token already retired and sign the person out. The browser presents this
+       secret to /api/session-token instead. */
+    const secret = newSecret();
+    await saveUserToken(me.id, await encryptSecret(refreshToken), await hashSecret(secret));
+    return json({ linked: true, secret, userId: me.id });
   } catch (e) {
     return fail(e);
   }
