@@ -100,6 +100,35 @@ export default async function handler(req: Request): Promise<Response> {
       }
     }
 
+    /* The schema has gained columns and a table since first release, and a
+       project running an older copy fails in ways that look like unrelated
+       bugs — builds landing nowhere, questions never appearing, tokens never
+       stored. Ask Postgres directly instead of making anyone guess whether
+       they re-ran the file. */
+    if (hasSupabase && checks.database?.ok) {
+      const missing: string[] = [];
+      const probes: [string, string][] = [
+        ['rooms.session_owner_id', 'rooms?select=session_owner_id&limit=1'],
+        ['room_events.options', 'room_events?select=options&limit=1'],
+        ['user_tokens', 'user_tokens?select=user_id&limit=1'],
+      ];
+      for (const [name, query] of probes) {
+        const [table, qs] = query.split('?');
+        try {
+          await sb<unknown[]>(table, { query: qs });
+        } catch {
+          missing.push(name);
+        }
+      }
+      checks.schemaCurrent = {
+        ok: missing.length === 0,
+        detail:
+          missing.length === 0
+            ? 'schema is up to date'
+            : `re-run supabase/schema.sql — missing: ${missing.join(', ')}`,
+      };
+    }
+
     const missingRealtime: string[] = [];
     if (!process.env.SUPABASE_JWT_SECRET) missingRealtime.push('SUPABASE_JWT_SECRET');
     if (!process.env.SUPABASE_ANON_KEY && !process.env.SUPABASE_PUBLISHABLE_KEY) {
@@ -127,15 +156,17 @@ export default async function handler(req: Request): Promise<Response> {
       }
     }
 
-    checks.offlineBuilding = {
+    checks.tokenStorage = {
       ok: canDelegate,
       detail: canDelegate
-        ? 'ROOM_DELEGATION_KEY present'
-        : 'ROOM_DELEGATION_KEY missing — arming offline building is refused (optional feature)',
+        ? 'ROOM_DELEGATION_KEY present — sign-ins can be stored, so rooms build on their owner'
+        : 'ROOM_DELEGATION_KEY missing — sign-ins cannot be encrypted, so nothing is stored and every member builds in their own session on their own credits',
     };
 
-    // Realtime and offline building are optional; only the first three block use.
-    const required = ['supabaseConfigured', 'database'];
+    /* Realtime and token storage both degrade rather than break: without them
+       rooms still work, just by polling and on per-member credits. A stale or
+       unreachable schema is the only thing that genuinely stops the feature. */
+    const required = ['supabaseConfigured', 'database', 'schemaCurrent'];
     const healthy = required.every((k) => checks[k]?.ok !== false);
 
     return json({ healthy, checks });
