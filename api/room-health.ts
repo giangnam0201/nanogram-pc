@@ -62,12 +62,13 @@ export default async function handler(req: Request): Promise<Response> {
 
     const checks: Record<string, Check> = {};
 
-    checks.nanogramAuth = {
-      ok: signedIn,
-      detail: signedIn
-        ? 'your token verified against v2/me'
-        : 'not signed in — open this from the app, or sign in, for full detail',
-    };
+    /* Only reported when it means something. Opening this from an address bar
+       sends no Authorization header, and listing that as a failed check reads
+       as a broken deployment when nothing is wrong — the one thing a
+       diagnostic must never do. Signed out, it is a note, not a check. */
+    if (signedIn) {
+      checks.nanogramAuth = { ok: true, detail: 'your token verified against v2/me' };
+    }
 
     checks.supabaseConfigured = {
       ok: hasSupabase,
@@ -169,7 +170,16 @@ export default async function handler(req: Request): Promise<Response> {
     const required = ['supabaseConfigured', 'database', 'schemaCurrent'];
     const healthy = required.every((k) => checks[k]?.ok !== false);
 
-    return json({ healthy, checks });
+    return json({
+      healthy,
+      signedIn,
+      ...(signedIn
+        ? {}
+        : {
+            note: 'Opened without signing in, so details are reduced. This is not a problem — open it from the app for the full report.',
+          }),
+      checks,
+    });
   } catch (e) {
     return fail(e);
   }
