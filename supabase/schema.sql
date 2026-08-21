@@ -77,6 +77,11 @@ create table if not exists public.room_events (
 
 create index if not exists room_events_room_id_idx on public.room_events (room_id, id);
 
+-- The model can answer with a question plus suggested replies instead of a
+-- build. Those options have to reach everyone in the room, not just whoever
+-- sent the prompt, or nobody can answer and the build stalls until it times out.
+alter table public.room_events add column if not exists options jsonb;
+
 -- ----------------------------------------------------------------- html ---
 
 -- Build snapshots are whole HTML documents, far too large to push through the
@@ -87,6 +92,22 @@ create table if not exists public.room_html (
   html        text not null,
   version     integer not null default 0,
   updated_at  timestamptz not null default now()
+);
+
+-- --------------------------------------------------------- user tokens ---
+
+-- Every signed-in user's Nanogram refresh token, AES-256-GCM encrypted by the
+-- API before it arrives here. A room's builds run on the room owner's token, so
+-- the room keeps one AI conversation and one credit pool no matter who is
+-- present or who typed the prompt.
+--
+-- No RLS policy is defined, so with RLS enabled this table is unreachable by
+-- any client key — only the service role can touch it. The ciphertext is also
+-- useless on its own: ROOM_DELEGATION_KEY lives only in the environment.
+create table if not exists public.user_tokens (
+  user_id            text primary key,
+  refresh_token_enc  text not null,
+  updated_at         timestamptz not null default now()
 );
 
 -- ----------------------------------------------------------- delegation ---
@@ -110,6 +131,7 @@ alter table public.room_members    enable row level security;
 alter table public.room_events     enable row level security;
 alter table public.room_html       enable row level security;
 alter table public.room_delegation enable row level security;
+alter table public.user_tokens      enable row level security;
 
 -- The verified Nanogram user id, as carried in our minted JWT.
 create or replace function public.ng_user() returns text
@@ -141,7 +163,8 @@ drop policy if exists room_html_read on public.room_html;
 create policy room_html_read on public.room_html
   for select using (public.is_room_member(room_id));
 
--- room_delegation intentionally has no policy: service role only.
+-- room_delegation and user_tokens intentionally have no policies: service role
+-- only, so no client key can read a stored credential.
 
 -- ------------------------------------------------------------- realtime ---
 

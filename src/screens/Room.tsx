@@ -3,6 +3,7 @@ import { chat as chatApi, gamegen } from '../lib/api';
 import { errorMessage, ipc } from '../lib/ipc';
 import { t } from '../lib/i18n';
 import { back, me, navigate, toast } from '../lib/store';
+import { parseAssistant } from '../lib/gamegen';
 import {
   localRefreshToken,
   rooms as roomsApi,
@@ -194,6 +195,9 @@ export function RoomScreen({ roomId }: { roomId: string }) {
           if ((event.version ?? 0) !== htmlVersionRef.current) void pullHtml();
         }
         if (event.type === 'build-failed') setBuild(null);
+        // The model asked something instead of building; the wait is over and
+        // the room now needs an answer.
+        if (event.type === 'ai') setBuild(null);
         if (event.type === 'published' && event.gameId) {
           toast(`@${event.actorName} published the game`);
         }
@@ -208,7 +212,7 @@ export function RoomScreen({ roomId }: { roomId: string }) {
      whether they finished. Only one poller is needed; everyone polls cheaply
      and the first to see the result broadcasts it as a snapshot event. */
   useEffect(() => {
-    if (!build || !state?.canBuildOffline) return;
+    if (!build || !state?.canBuildOnOwner) return;
     let alive = true;
     let attempt = 0;
     let timer: number;
@@ -232,7 +236,7 @@ export function RoomScreen({ roomId }: { roomId: string }) {
       alive = false;
       window.clearTimeout(timer);
     };
-  }, [build?.startedAt, state?.canBuildOffline, roomId]);
+  }, [build?.startedAt, state?.canBuildOnOwner, roomId]);
 
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
@@ -277,17 +281,32 @@ export function RoomScreen({ roomId }: { roomId: string }) {
           );
         }
       } else {
-        const res = await roomsApi.prompt(roomId, text);
-        setBuild({
-          startedAt: Date.now(),
-          by: me.value?.username ?? 'you',
-          avatar: me.value?.avatarUrl ?? null,
-          prompt: text,
-        });
-        if (res.mode === 'local') await runLocalBuild(text, res.continueSession ?? null);
+        await sendPrompt(text);
       }
     } catch (e) {
       setDraft(text);
+      setBuild(null);
+      toast(errorMessage(e, "That didn't go through."), 'error');
+    } finally {
+      setSending(false);
+    }
+  }
+
+  /** Start a build. Shared by the composer and by answering the model's
+   *  question — picking an option is just sending it as the next prompt. */
+  async function sendPrompt(text: string) {
+    if (!text.trim() || build) return;
+    setSending(true);
+    try {
+      const res = await roomsApi.prompt(roomId, text);
+      setBuild({
+        startedAt: Date.now(),
+        by: me.value?.username ?? 'you',
+        avatar: me.value?.avatarUrl ?? null,
+        prompt: text,
+      });
+      if (res.mode === 'local') await runLocalBuild(text, res.continueSession ?? null);
+    } catch (e) {
       setBuild(null);
       toast(errorMessage(e, "That didn't go through."), 'error');
     } finally {
@@ -367,6 +386,23 @@ export function RoomScreen({ roomId }: { roomId: string }) {
 
         const finished =
           Boolean(last?.status) && last?.status !== 'pending' && last?.status !== 'running';
+
+        /* The model often answers with a question rather than a build — "what
+           kind of game?", with options. That is a normal outcome, not a
+           failure, and it has to reach the whole room: otherwise only the
+           person who sent the prompt ever sees it, nobody answers, and the
+           build sits there until it times out. */
+        if (finished && last && last.role !== 'user') {
+          const parsed = parseAssistant(last.content);
+          if (parsed.options.length > 0 || (parsed.text && !snapshot)) {
+            await roomsApi
+              .askedQuestion(roomId, parsed.text, parsed.options, last.id)
+              .catch(() => {});
+            posted = true;
+            break;
+          }
+        }
+
         // Finished, but the snapshot has not landed yet — give it a few more
         // polls before calling it a failure.
         if (finished && ++settling > 4) break;
@@ -395,6 +431,16 @@ export function RoomScreen({ roomId }: { roomId: string }) {
 
   /* Derived from the live member list rather than from `state`, which is the
      snapshot taken when the room was opened and never refetched. */
+  /* The last question the model asked, if it has not been answered since. */
+  const latestQuestionSeq = (() => {
+    for (let i = events.length - 1; i >= 0; i--) {
+      const event = events[i];
+      if (event.type === 'prompt' || event.type === 'snapshot') return -1;
+      if (event.type === 'ai' && (event.options?.length ?? 0) > 0) return event.seq;
+    }
+    return -1;
+  })();
+
   const canPublish = Boolean(
     identityKnown && state.room.sessionOwnerId && state.room.sessionOwnerId === me.value?.id,
   );
@@ -483,7 +529,15 @@ export function RoomScreen({ roomId }: { roomId: string }) {
             )}
 
             {events.map((event) => (
-              <RoomEventRow key={event.seq} event={event} mine={event.actorId === me.value?.id} />
+              <RoomEventRow
+                key={event.seq}
+                event={event}
+                mine={event.actorId === me.value?.id}
+                // Only the newest question is still worth answering, and only
+                // while nothing is building.
+                answerable={event.seq === latestQuestionSeq && !build}
+                onChoose={(option) => void sendPrompt(option)}
+              />
             ))}
 
             {build && (
@@ -544,7 +598,7 @@ export function RoomScreen({ roomId }: { roomId: string }) {
               </button>
             </form>
 
-            {mode === 'build' && identityKnown && !state.canBuildOffline && !canPublish && (
+            {mode === 'build' && identityKnown && !state.canBuildOnOwner && !canPublish && (
               <p class="room-hint">
                 Building picks up from the room's current game and uses your own
                 credits.
@@ -606,7 +660,45 @@ export function RoomScreen({ roomId }: { roomId: string }) {
 
 /* --------------------------------------------------------------- rows --- */
 
-function RoomEventRow({ event, mine }: { event: RoomEvent; mine: boolean }) {
+function RoomEventRow({
+  event,
+  mine,
+  answerable,
+  onChoose,
+}: {
+  event: RoomEvent;
+  mine: boolean;
+  answerable?: boolean;
+  onChoose?: (option: string) => void;
+}) {
+  /* The model talking to the room. Rendered like an incoming message with its
+     suggested replies as chips, matching the single-player create flow — and
+     anyone present may answer, not only whoever sent the prompt. */
+  if (event.type === 'ai') {
+    return (
+      <div class="msg-group">
+        <div class="bubble bubble-in">
+          <span class="bubble-who">Nanogram</span>
+          {event.text}
+        </div>
+        {(event.options?.length ?? 0) > 0 && (
+          <div class="choice-row">
+            {event.options?.map((option) => (
+              <button
+                key={option}
+                class="choice"
+                disabled={!answerable}
+                onClick={() => onChoose?.(option)}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (event.type === 'chat') {
     return (
       <div class={`bubble ${mine ? 'bubble-out' : 'bubble-in'}`}>
@@ -636,6 +728,7 @@ function RoomEventRow({ event, mine }: { event: RoomEvent; mine: boolean }) {
     settings: event.text ?? 'Room settings changed',
     'build-start': `@${event.actorName} started a build`,
     'build-done': 'Build finished',
+    ai: event.text ?? 'Nanogram replied',
     title: event.text ?? 'Room renamed',
   };
 
@@ -737,7 +830,6 @@ function RoomSettingsSheet({
 }) {
   const [title, setTitle] = useState(state.room.title);
   const [quota, setQuota] = useState(state.room.creditQuota ? String(state.room.creditQuota) : '');
-  const [hours, setHours] = useState('12');
   const [busy, setBusy] = useState(false);
   const [armed, setArmed] = useState(state.room.delegated);
 
@@ -760,15 +852,15 @@ function RoomSettingsSheet({
   async function arm() {
     const refreshToken = localRefreshToken();
     if (!refreshToken) {
-      toast('Offline building can only be turned on from the web app.', 'error');
+      toast('Linking a sign-in only works on the web app.', 'error');
       return;
     }
     setBusy(true);
     try {
-      await roomsApi.delegate(state.room.id, refreshToken, Number(hours) || 12);
+      await roomsApi.delegate(state.room.id, refreshToken, 24);
       setArmed(true);
       onChanged(await roomsApi.get(state.room.id));
-      toast('The room can now build while you are away');
+      toast('Linked — builds now run on your credits');
     } catch (e) {
       toast(errorMessage(e, "Couldn't turn that on."), 'error');
     } finally {
@@ -782,7 +874,7 @@ function RoomSettingsSheet({
       await roomsApi.revoke(state.room.id);
       setArmed(false);
       onChanged(await roomsApi.get(state.room.id));
-      toast('Offline building turned off');
+      toast('Unlinked');
     } catch (e) {
       toast(errorMessage(e, "Couldn't turn that off."), 'error');
     } finally {
@@ -823,53 +915,38 @@ function RoomSettingsSheet({
           Save
         </Button>
 
-        <div class="divider">Put builds on your credits</div>
+        <div class="divider">Whose credits builds use</div>
 
         <p class="field-hint">
-          Everyone in the room can already build — each build continues the
-          room's current game in that person's own session, on their own
-          credits. This option is separate: it makes builds run on{' '}
-          <strong>your</strong> session and your credits instead, so the room
-          shares one AI conversation rather than a chain of remixes.
+          Builds in this room run on <strong>your</strong> Nanogram session and
+          your credits, up to the limit above, no matter who typed the prompt or
+          whether you are here. That keeps the room on one AI conversation
+          instead of a chain of remixes. Your sign-in is encrypted before it is
+          stored and is only ever used for your rooms.
         </p>
 
         {!state.delegationAvailable ? (
           <p class="field-hint">
-            Unavailable: this deployment has no <code>ROOM_DELEGATION_KEY</code> set, so a
-            sign-in cannot be stored safely. Building still works for everyone without it.
+            Unavailable: this deployment has no <code>ROOM_DELEGATION_KEY</code>, so a sign-in
+            cannot be stored safely. Until it is set, each person builds in their own session
+            on their own credits instead.
           </p>
         ) : armed ? (
           <>
-            <p class="field-hint">
-              The room can build without you. Your sign-in is stored encrypted and is only used for
-              this room's builds.
-            </p>
+            <p class="field-hint">Linked and working.</p>
             <Button variant="danger" full onClick={() => void revoke()} loading={busy}>
-              Turn off and delete it
+              Unlink my sign-in
             </Button>
           </>
         ) : (
           <>
             <p class="field-hint">
-              Builds will run on your session and your credits, up to the limit above, even when
-              you are not here. Your sign-in is encrypted before it is stored and deleted when you
-              turn this off. Only do this in a room you trust.
+              Not linked yet — sign in again on the web app to link it automatically, or link it
+              now.
             </p>
-            <div class="hstack">
-              <input
-                class="input"
-                type="number"
-                min="1"
-                max="48"
-                value={hours}
-                onInput={(e) => setHours((e.target as HTMLInputElement).value)}
-                style={{ width: 90 }}
-              />
-              <span class="muted small">hours, then it expires on its own</span>
-            </div>
             <Button full onClick={() => void arm()} loading={busy}>
               <Icon name="ic_auto_awesome" size={15} />
-              Put the room's builds on my credits
+              Link my sign-in
             </Button>
           </>
         )}

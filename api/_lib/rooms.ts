@@ -44,7 +44,9 @@ export type EventType =
   | 'snapshot'
   | 'published'
   | 'title'
-  | 'settings';
+  | 'settings'
+  /** The model replied with a question, usually offering options to pick from. */
+  | 'ai';
 
 export interface RoomEvent {
   seq: number;
@@ -56,6 +58,8 @@ export interface RoomEvent {
   text?: string;
   version?: number;
   gameId?: string;
+  /** Suggested replies on an `ai` event. Anyone in the room may pick one. */
+  options?: string[];
 }
 
 export interface Member {
@@ -150,6 +154,7 @@ interface EventRow {
   body: string | null;
   version: number | null;
   game_id: string | null;
+  options: string[] | null;
   at: string;
 }
 
@@ -164,6 +169,7 @@ function toEvent(row: EventRow): RoomEvent {
     text: row.body ?? undefined,
     version: row.version ?? undefined,
     gameId: row.game_id ?? undefined,
+    options: row.options ?? undefined,
   };
 }
 
@@ -481,6 +487,7 @@ export async function appendEvent(
         body: event.text ?? null,
         version: event.version ?? null,
         game_id: event.gameId ?? null,
+        options: event.options ?? null,
       },
     });
     return toEvent(rows[0]);
@@ -624,6 +631,58 @@ export async function setDelegation(roomId: string, delegation: Delegation): Pro
   }
   const ttl = Math.max(60, Math.floor((Date.parse(delegation.expiresAt) - Date.now()) / 1000));
   await setJson(`room:${roomId}:deleg`, delegation, Math.min(ttl, ROOM_TTL));
+}
+
+/* -------------------------------------------------------- user tokens --- */
+
+/* A room's builds run on the room owner's Nanogram session, so the room keeps
+   one AI conversation and one credit pool regardless of who typed the prompt.
+   That needs the owner's refresh token available server-side, stored encrypted.
+   Kept per user rather than per room: one person may own several rooms, and
+   re-linking should fix all of them at once. */
+
+interface TokenRow {
+  user_id: string;
+  refresh_token_enc: string;
+  updated_at: string;
+}
+
+export async function saveUserToken(userId: string, encrypted: string): Promise<void> {
+  if (hasSupabase) {
+    await sb('user_tokens', {
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates',
+      body: {
+        user_id: userId,
+        refresh_token_enc: encrypted,
+        updated_at: new Date().toISOString(),
+      },
+    });
+    return;
+  }
+  await setJson(`usertoken:${userId}`, { refresh_token_enc: encrypted }, ROOM_TTL);
+}
+
+export async function getUserToken(userId: string): Promise<string | null> {
+  if (hasSupabase) {
+    const row = await sbOne<TokenRow>('user_tokens', {
+      query: `user_id=eq.${encodeURIComponent(userId)}&select=*`,
+    });
+    return row?.refresh_token_enc ?? null;
+  }
+  const stored = await getJson<{ refresh_token_enc?: string }>(`usertoken:${userId}`);
+  return stored?.refresh_token_enc ?? null;
+}
+
+export async function clearUserToken(userId: string): Promise<void> {
+  if (hasSupabase) {
+    await sb('user_tokens', {
+      method: 'DELETE',
+      query: `user_id=eq.${encodeURIComponent(userId)}`,
+    });
+    return;
+  }
+  await cmd('DEL', `usertoken:${userId}`);
 }
 
 export async function clearDelegation(roomId: string): Promise<void> {

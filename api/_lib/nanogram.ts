@@ -1,8 +1,9 @@
 /* Server-side calls to Nanogram on a delegated host's behalf.
  *
- * Only used for rooms whose host explicitly armed "keep building while I'm
- * away". Everything else runs from the member's own browser with their own
- * token, and never passes through here.
+ * A room's builds run on the room owner's session, so the room keeps one AI
+ * conversation and one credit pool no matter who typed the prompt or who is
+ * online. That is what this is for. If the owner has no stored sign-in, the
+ * caller falls back to building from their own browser instead.
  *
  * Refresh-token rotation is the sharp edge. Nanogram's /auth/refresh returns a
  * fresh pair, and if it rotates (issues a new refresh token and retires the
@@ -15,7 +16,12 @@
 
 import { cmd, getJson, setJson } from './store';
 import { decryptSecret, encryptSecret } from './crypto';
-import { clearDelegation, getDelegation, setDelegation, type Room } from './rooms';
+import {
+  clearUserToken,
+  getUserToken,
+  saveUserToken,
+  type Room,
+} from './rooms';
 
 const API_BASE = 'https://api.nanogram.app/';
 
@@ -56,56 +62,56 @@ async function refreshPair(refreshToken: string): Promise<TokenPair> {
 }
 
 /**
- * A usable access token for this room's host, refreshing only when the cached
- * one is close to expiry.
+ * A usable access token for one user, from their stored refresh token.
+ *
+ * Cached against the user so repeated builds in a busy room do not refresh on
+ * every prompt — refreshing is the operation that can rotate the token and
+ * disturb that person's own session, so it is done as rarely as possible.
  */
-export async function delegatedAccessToken(roomId: string): Promise<string> {
-  const cached = await getJson<{ token: string }>(`room:${roomId}:deleg:access`);
+export async function accessTokenForUser(userId: string): Promise<string> {
+  const cached = await getJson<{ token: string }>(`accesstoken:${userId}`);
   if (cached?.token) {
     const exp = expiresAt(cached.token);
     if (exp === null || Date.now() / 1000 + 90 < exp) return cached.token;
   }
 
-  const delegation = await getDelegation(roomId);
-  if (!delegation) throw new DelegationFailed('this room has no offline permission');
+  const stored = await getUserToken(userId);
+  if (!stored) throw new DelegationFailed('no stored sign-in for that account');
 
-  if (Date.parse(delegation.expiresAt) < Date.now()) {
-    await clearDelegation(roomId);
-    throw new DelegationFailed('the host’s offline permission has expired');
-  }
-
-  const refreshToken = await decryptSecret(delegation.refreshToken);
+  const refreshToken = await decryptSecret(stored);
   if (!refreshToken) {
     // Key rotated, or the blob is corrupt. Either way it can never be used.
-    await clearDelegation(roomId);
-    throw new DelegationFailed('stored host credentials could not be read');
+    await clearUserToken(userId);
+    throw new DelegationFailed('stored sign-in could not be read');
   }
 
   let pair: TokenPair;
   try {
     pair = await refreshPair(refreshToken);
   } catch (e) {
-    await clearDelegation(roomId);
+    await clearUserToken(userId);
     throw e;
   }
 
   // Persist the rotated refresh token, or the next refresh fails.
   if (pair.refreshToken !== refreshToken) {
-    await setDelegation(roomId, {
-      ...delegation,
-      refreshToken: await encryptSecret(pair.refreshToken),
-    });
+    await saveUserToken(userId, await encryptSecret(pair.refreshToken));
   }
 
   const exp = expiresAt(pair.accessToken);
   const ttl = exp ? Math.max(60, Math.floor(exp - Date.now() / 1000 - 60)) : 600;
-  await setJson(`room:${roomId}:deleg:access`, { token: pair.accessToken }, ttl);
+  await setJson(`accesstoken:${userId}`, { token: pair.accessToken }, ttl);
   return pair.accessToken;
 }
 
-/** Drop the cached access token — used when the host re-arms delegation. */
-export async function dropCachedAccess(roomId: string): Promise<void> {
-  await cmd('DEL', `room:${roomId}:deleg:access`);
+/** The token a room builds with: always the room owner's. */
+export function roomBuildToken(room: Room): Promise<string> {
+  return accessTokenForUser(room.hostId);
+}
+
+/** Drop a cached access token — used when someone re-links their sign-in. */
+export async function dropCachedAccess(userId: string): Promise<void> {
+  await cmd('DEL', `accesstoken:${userId}`);
 }
 
 /* ------------------------------------------------------------ requests --- */
@@ -176,9 +182,7 @@ export const asHost = {
     ),
 };
 
-/** True when this room can build without any member present. */
-export async function canBuildOffline(room: Room): Promise<boolean> {
-  if (!room.delegated) return false;
-  const delegation = await getDelegation(room.id);
-  return Boolean(delegation) && Date.parse(delegation!.expiresAt) > Date.now();
+/** Whether this room's builds can run server-side on the owner's session. */
+export async function canBuildOnOwner(room: Room): Promise<boolean> {
+  return Boolean(await getUserToken(room.hostId));
 }

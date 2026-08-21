@@ -12,7 +12,7 @@ import {
   unreadChats,
   unreadNotifications,
 } from './lib/store';
-import { rooms as roomsApi, roomsAvailable } from './lib/rooms';
+import { localRefreshToken, rooms as roomsApi, roomsAvailable } from './lib/rooms';
 import { notifications as notificationsApi } from './lib/api';
 import { isTauri } from './lib/transport';
 import { NavBar } from './components/NavBar';
@@ -125,6 +125,23 @@ export function App() {
   useEffect(() => {
     unreadChats.value = me.value?.chatUnreadCount ?? 0;
   }, [me.value?.chatUnreadCount]);
+
+  /* Rooms build on the room owner's Nanogram session, so the server needs that
+     account's sign-in. Linking it here means a room simply works instead of
+     failing later with nothing the owner can act on, and re-linking on every
+     load keeps the stored copy current if Nanogram rotates refresh tokens.
+
+     Only the browser build holds a refresh token; the desktop build keeps it
+     in Rust and never exposes it, so there is nothing to link there. */
+  useEffect(() => {
+    if (!loggedIn.value || needsOnboarding.value || !roomsAvailable) return;
+    const refreshToken = localRefreshToken();
+    if (!refreshToken) return;
+    void roomsApi.linkToken(refreshToken).catch(() => {
+      /* Not fatal: without it a room falls back to building in each member's
+         own session. Room settings reports the state. */
+    });
+  }, [loggedIn.value, needsOnboarding.value, me.value?.id]);
 
   /* A room invite link (…/?join=ABC123) drops the recipient straight into the
      room once they are signed in. The code is consumed from the URL either way,

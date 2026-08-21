@@ -18,10 +18,11 @@ import { canDelegate, DelegationUnavailable, encryptSecret } from './_lib/crypto
 import {
   appendEvent,
   backendKind,
-  clearDelegation,
+  clearUserToken,
+  getUserToken,
+  saveUserToken,
   creditsSpent,
   currentSeq,
-  getDelegation,
   getHtml,
   getMember,
   getRoom,
@@ -32,12 +33,14 @@ import {
   readEvents,
   ROOM_TTL,
   saveRoom,
-  setDelegation,
   setHtml,
   touchMember,
   type Room,
 } from './_lib/rooms';
-import { asHost, canBuildOffline, delegatedAccessToken, dropCachedAccess } from './_lib/nanogram';
+import { asHost, canBuildOnOwner, dropCachedAccess, roomBuildToken } from './_lib/nanogram';
+// Same parser the screens use, so the room and the single-player flow can
+// never disagree about what the model asked.
+import { parseAssistant } from '../src/lib/gamegen';
 
 export const config = { runtime: 'edge' };
 
@@ -49,7 +52,7 @@ async function state(room: Room, since: number, includeHtml: boolean) {
     readEvents(room.id, since),
     currentSeq(room.id),
     creditsSpent(room.id),
-    canBuildOffline(room),
+    canBuildOnOwner(room),
   ]);
   const now = Date.now();
   const host = members.find((m) => m.isHost);
@@ -77,7 +80,7 @@ async function state(room: Room, since: number, includeHtml: boolean) {
     seq,
     creditsSpent: spent,
     hostOnline: host ? isOnline(host, now) : false,
-    canBuildOffline: offline,
+    canBuildOnOwner: offline,
     storage: backendKind(),
     delegationAvailable: canDelegate,
     html: includeHtml ? await getHtml(room.id) : undefined,
@@ -166,21 +169,13 @@ export default async function handler(req: Request): Promise<Response> {
           text,
         });
 
-        const offline = await canBuildOffline(room);
-        if (!offline) {
-          /* Anyone in the room can build. GameGen sessions are single-owner, so
-             a member cannot drive the session someone else created — but
-             createSession accepts remixHtml, so they can continue the same game
-             in a session of their own, seeded with the room's current build.
-             The room's real state is the HTML snapshot, not the session, so the
-             game carries forward intact and each person spends their own
-             credits. `continueSession` is set only when the caller already owns
-             the session holding the latest build. */
+        const onOwner = await canBuildOnOwner(room);
+        if (!onOwner) {
+          /* The room owner has no stored sign-in, so the server cannot drive
+             their session. Fall back to the caller's own browser: sessions are
+             single-owner, but createSession accepts remixHtml, so the game
+             continues from the room's current build in a session of theirs. */
           const canContinue = Boolean(room.sessionId && room.sessionOwnerId === me.id);
-
-          // Broadcast build-start from here: without it the other members see
-          // the prompt and then nothing at all until the finished snapshot
-          // lands, with no sign a build is even running.
           await appendEvent(room.id, {
             type: 'build-start',
             actorId: me.id,
@@ -194,20 +189,20 @@ export default async function handler(req: Request): Promise<Response> {
           });
         }
 
-        const token = await delegatedAccessToken(room.id);
+        const token = await roomBuildToken(room);
 
         let sessionId = room.sessionId;
-        if (!sessionId) {
+        if (!sessionId || room.sessionOwnerId !== room.hostId) {
+          // Seed from whatever the room has built so far, so a session started
+          // by someone else is carried forward rather than lost.
           const created = await asHost.createSession(token, {
             styleId: room.styleId ?? '',
             dimension: room.dimension ?? undefined,
             description: text,
-            // Seed from whatever the room has built so far.
             remixHtml: (await getHtml(room.id)) ?? '',
           });
           sessionId = created.id;
           room.sessionId = sessionId;
-          // Created with the host's token, so the host owns it.
           room.sessionOwnerId = room.hostId;
           await saveRoom(room);
         }
@@ -221,16 +216,16 @@ export default async function handler(req: Request): Promise<Response> {
           actorAvatar: me.avatarUrl,
           text,
         });
-        return json({ mode: 'server', sessionId });
+        return json({ mode: 'server', sessionId })
       }
 
       /* Pull the latest build result from Nanogram using the host's token.
          Members poll this while a delegated build is running. */
       case 'sync': {
-        if (!(await canBuildOffline(room)) || !room.sessionId) {
+        if (!(await canBuildOnOwner(room)) || !room.sessionId) {
           return json({ synced: false });
         }
-        const token = await delegatedAccessToken(room.id);
+        const token = await roomBuildToken(room);
         const res = await asHost.messages(token, room.sessionId);
         const messages = res.messages ?? [];
         const last = messages[messages.length - 1];
@@ -257,7 +252,32 @@ export default async function handler(req: Request): Promise<Response> {
             });
           }
         }
-        return json({ synced: true, running, htmlVersion: room.htmlVersion });
+
+        /* The model often answers with a question rather than a build — "what
+           kind of game?", with options to choose from. That has to reach the
+           whole room: only the person who sent the prompt would otherwise ever
+           see it, and if nobody answers the build simply stalls until it times
+           out. Posted once, keyed on the message id. */
+        if (!running && last && last.role !== 'user') {
+          const parsed = parseAssistant(last.content);
+          if (parsed.text || parsed.options.length) {
+            const already = await readEvents(room.id, 0);
+            const seen = already.some((e) => e.type === 'ai' && e.gameId === last.id);
+            if (!seen) {
+              await appendEvent(room.id, {
+                type: 'ai',
+                actorId: room.hostId,
+                actorName: room.hostName,
+                text: parsed.text,
+                options: parsed.options,
+                // Reused as the de-dupe key: one 'ai' event per model message.
+                gameId: last.id,
+              });
+            }
+          }
+        }
+
+        return json({ synced: true, running, htmlVersion: room.htmlVersion })
       }
 
       /* The host's browser created the room's GameGen session. Recorded straight
@@ -297,6 +317,41 @@ export default async function handler(req: Request): Promise<Response> {
           version: room.htmlVersion,
         });
         return json({ htmlVersion: room.htmlVersion });
+      }
+
+      /* The caller's browser saw the model ask a question instead of building.
+         Posting it here is what makes it answerable by anyone in the room
+         rather than only by whoever happened to send the prompt. */
+      case 'asked': {
+        const text = String(body.text ?? '').trim().slice(0, 2000);
+        const options = Array.isArray(body.options)
+          ? body.options
+              .filter((o): o is string => typeof o === 'string')
+              .map((o) => o.trim())
+              .filter(Boolean)
+              .slice(0, 8)
+          : [];
+        if (!text && options.length === 0) return json({ error: 'nothing to post' }, 400);
+
+        const messageId = typeof body.messageId === 'string' ? body.messageId : undefined;
+        if (messageId) {
+          // Every member polls, so the same question can be reported more than
+          // once. One event per model message.
+          const already = await readEvents(room.id, 0);
+          if (already.some((e) => e.type === 'ai' && e.gameId === messageId)) {
+            return json({ ok: true, duplicate: true });
+          }
+        }
+
+        const event = await appendEvent(room.id, {
+          type: 'ai',
+          actorId: room.hostId,
+          actorName: room.hostName,
+          text,
+          options,
+          gameId: messageId,
+        });
+        return json({ event });
       }
 
       case 'build-failed': {
@@ -351,18 +406,10 @@ export default async function handler(req: Request): Promise<Response> {
         const refreshToken = String(body.refreshToken ?? '');
         if (!refreshToken) return json({ error: 'missing refresh token' }, 400);
 
-        const hours = Math.min(
-          MAX_DELEGATION_HOURS,
-          Math.max(1, Number(body.hours ?? 12)),
-        );
-        await setDelegation(room.id, {
-          hostId: me.id,
-          refreshToken: await encryptSecret(refreshToken),
-          armedAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() + hours * 3600_000).toISOString(),
-        });
-        // Any cached access token belongs to the previous arming.
-        await dropCachedAccess(room.id);
+        // Stored per user, not per room: one person may own several rooms, and
+        // re-linking once should fix all of them.
+        await saveUserToken(me.id, await encryptSecret(refreshToken));
+        await dropCachedAccess(me.id);
 
         room.delegated = true;
         await saveRoom(room);
@@ -370,22 +417,22 @@ export default async function handler(req: Request): Promise<Response> {
           type: 'settings',
           actorId: me.id,
           actorName: me.username,
-          text: `${me.username} let the room keep building for ${hours}h`,
+          text: `Builds now run on @${me.username}'s credits`,
         });
-        return json({ ok: true, expiresInHours: hours });
+        return json({ ok: true });
       }
 
       case 'revoke': {
         if (!isHost) return json({ error: 'only the host can do this' }, 403);
-        await clearDelegation(room.id);
-        await dropCachedAccess(room.id);
+        await clearUserToken(me.id);
+        await dropCachedAccess(me.id);
         room.delegated = false;
         await saveRoom(room);
         await appendEvent(room.id, {
           type: 'settings',
           actorId: me.id,
           actorName: me.username,
-          text: `${me.username} turned off offline building`,
+          text: `${me.username} unlinked their sign-in`,
         });
         return json({ ok: true });
       }
@@ -393,10 +440,9 @@ export default async function handler(req: Request): Promise<Response> {
       /* Lets the host's client confirm what is stored without exposing it. */
       case 'delegation-status': {
         if (!isHost) return json({ error: 'only the host can do this' }, 403);
-        const delegation = await getDelegation(room.id);
         return json({
-          armed: Boolean(delegation),
-          expiresAt: delegation?.expiresAt ?? null,
+          armed: Boolean(await getUserToken(room.hostId)),
+          expiresAt: null,
           maxHours: MAX_DELEGATION_HOURS,
           available: canDelegate,
           roomTtlHours: ROOM_TTL / 3600,

@@ -40,7 +40,8 @@ export type RoomEventType =
   | 'snapshot'
   | 'published'
   | 'title'
-  | 'settings';
+  | 'settings'
+  | 'ai';
 
 export interface RoomEvent {
   seq: number;
@@ -52,6 +53,8 @@ export interface RoomEvent {
   text?: string;
   version?: number;
   gameId?: string;
+  /** Suggested replies on an `ai` event. Anyone in the room may pick one. */
+  options?: string[];
 }
 
 export interface RoomSummary {
@@ -94,7 +97,7 @@ export interface RoomState {
   seq: number;
   creditsSpent: number;
   hostOnline: boolean;
-  canBuildOffline: boolean;
+  canBuildOnOwner: boolean;
   storage: 'redis' | 'memory';
   delegationAvailable: boolean;
   html?: string | null;
@@ -199,6 +202,10 @@ export const rooms = {
 
   buildFailed: (id: string, text: string) => rooms.act(id, { action: 'build-failed', text }),
 
+  /** Publish the model's question, with its options, to the whole room. */
+  askedQuestion: (id: string, text: string, options: string[], messageId?: string) =>
+    rooms.act(id, { action: 'asked', text, options, messageId }),
+
   delegationStatus: (id: string) =>
     rooms.act<{ armed: boolean; expiresAt: string | null; maxHours: number; available: boolean }>(
       id,
@@ -213,6 +220,12 @@ export const rooms = {
     }),
 
   revoke: (id: string) => rooms.act(id, { action: 'revoke' }),
+
+  /** Store this account's sign-in so rooms it owns can build server-side. */
+  linkToken: (refreshToken: string) =>
+    call<{ linked: boolean }>('/link-token', { method: 'POST', body: { refreshToken } }),
+
+  tokenLinked: () => call<{ linked: boolean; available: boolean }>('/link-token'),
 
   /** Credentials for a Supabase Realtime subscription, if it is configured. */
   realtimeCreds: (id: string) =>
