@@ -157,6 +157,28 @@ export function RoomScreen({ roomId }: { roomId: string }) {
     };
   }, [roomId]);
 
+  /* Self-heal a room whose owner is not linked.
+     Rooms created before tokens were stored, or whose owner's link failed or
+     expired, would silently build in each member's own session forever. If the
+     owner is the one looking at it, fix it here rather than expecting them to
+     find a setting — most people never will. */
+  useEffect(() => {
+    if (!state || !isHost || state.canBuildOnOwner || !state.delegationAvailable) return;
+    const refreshToken = localRefreshToken();
+    if (!refreshToken) return;
+    let alive = true;
+    void roomsApi
+      .linkToken(refreshToken)
+      .then(() => roomsApi.get(roomId))
+      .then((fresh) => alive && setState(fresh))
+      .catch(() => {
+        /* Leave it on the fallback; room settings explains the state. */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [roomId, isHost, state?.canBuildOnOwner, state?.delegationAvailable]);
+
   /* ------------------------------------------------------------- stream --- */
 
   useEffect(() => {

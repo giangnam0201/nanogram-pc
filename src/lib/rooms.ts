@@ -98,7 +98,7 @@ export interface RoomState {
   creditsSpent: number;
   hostOnline: boolean;
   canBuildOnOwner: boolean;
-  storage: 'redis' | 'memory';
+  storage: 'supabase' | 'memory';
   delegationAvailable: boolean;
   html?: string | null;
 }
@@ -154,7 +154,7 @@ async function call<T>(path: string, init?: JsonInit): Promise<T> {
 
 export const rooms = {
   list: () =>
-    call<{ rooms: RoomSummary[]; storage: 'redis' | 'memory'; delegationAvailable: boolean }>(
+    call<{ rooms: RoomSummary[]; storage: 'supabase' | 'memory'; delegationAvailable: boolean }>(
       '/rooms',
     ),
 

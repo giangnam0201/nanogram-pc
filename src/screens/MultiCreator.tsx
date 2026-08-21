@@ -4,7 +4,12 @@ import { errorMessage } from '../lib/ipc';
 import { t } from '../lib/i18n';
 import { cdnUrl } from '../lib/cdn';
 import { navigate, toast } from '../lib/store';
-import { rooms as roomsApi, roomsAvailable, type RoomSummary } from '../lib/rooms';
+import {
+  localRefreshToken,
+  rooms as roomsApi,
+  roomsAvailable,
+  type RoomSummary,
+} from '../lib/rooms';
 import { Avatar, Button, EmptyState, Sheet, Spinner, formatCount, timeAgo } from '../components/common';
 import { Icon } from '../components/Icon';
 import type { Credits, GameGenStyle } from '../lib/types';
@@ -18,7 +23,7 @@ import type { Credits, GameGenStyle } from '../lib/types';
 
 export function MultiCreatorScreen() {
   const [list, setList] = useState<RoomSummary[] | null>(null);
-  const [storage, setStorage] = useState<'redis' | 'memory'>('redis');
+  const [storage, setStorage] = useState<'supabase' | 'memory'>('supabase');
   const [credits, setCredits] = useState<Credits | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [joinOpen, setJoinOpen] = useState(false);
@@ -80,8 +85,8 @@ export function MultiCreatorScreen() {
           <div class="notice notice-warn">
             <Icon name="ic_report_flag" size={15} />
             <span>
-              Rooms are being kept in memory because no Redis is configured. Fine for local
-              testing — they will not survive on a real deployment.
+              Rooms are being kept in memory because Supabase is not configured. Fine for
+              local testing — they will not survive on a real deployment.
             </span>
           </div>
         )}
@@ -138,7 +143,7 @@ export function MultiCreatorScreen() {
                 </div>
               </div>
               {room.delegated && (
-                <span class="chip chip-quiet" title="This room can build while the host is away">
+                <span class="chip chip-quiet" title="Builds run on the owner's credits">
                   <Icon name="ic_auto_awesome" size={13} />
                 </span>
               )}
@@ -201,6 +206,20 @@ function CreateRoomSheet({
     if (busy) return;
     setBusy(true);
     try {
+      /* Link the creator's sign-in before the room exists, not alongside it.
+         The room will build on this account, and the app-load link is
+         fire-and-forget — so without this a room made moments after opening the
+         app can be created before its owner is linked, and quietly falls back
+         to every member building in their own session. Nobody would know to go
+         and fix that, so it is done here where it cannot be missed. */
+      const refreshToken = localRefreshToken();
+      if (refreshToken) {
+        await roomsApi.linkToken(refreshToken).catch(() => {
+          /* Not fatal — the room still works, just on each member's own
+             credits. Room settings reports which. */
+        });
+      }
+
       const style = styles?.find((s) => s.id === styleId) ?? null;
       const res = await roomsApi.create({
         title: title.trim(),
