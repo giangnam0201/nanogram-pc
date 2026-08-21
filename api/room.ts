@@ -234,9 +234,11 @@ export default async function handler(req: Request): Promise<Response> {
         const res = await asHost.messages(token, room.sessionId);
         const messages = res.messages ?? [];
         const last = messages[messages.length - 1];
+        // Newest snapshot wins; remixHtml is only the seed, and an empty one
+        // must not be mistaken for a real build.
         const html =
-          res.remixHtml ??
-          [...messages].reverse().find((m) => m.htmlSnapshot)?.htmlSnapshot ??
+          [...messages].reverse().find((m) => m.htmlSnapshot)?.htmlSnapshot ||
+          res.remixHtml ||
           null;
 
         const running = last?.status === 'pending' || last?.status === 'running';

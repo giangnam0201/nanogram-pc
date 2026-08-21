@@ -34,6 +34,25 @@ function nextDelay(attempt: number): number {
   return BACKOFF[Math.min(attempt, BACKOFF.length - 1)];
 }
 
+/**
+ * The newest real HTML in a session.
+ *
+ * Message snapshots are preferred over `remixHtml`, which is the seed the
+ * session was created from rather than its current state. Empty strings count
+ * as absent — a session seeded with '' reports `remixHtml: ''`, and treating
+ * that as a value silently blanks the room's game.
+ */
+function latestHtml(
+  remixHtml: string | null | undefined,
+  messages: { htmlSnapshot?: string | null }[],
+): string | null {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const snapshot = messages[i].htmlSnapshot;
+    if (snapshot) return snapshot;
+  }
+  return remixHtml || null;
+}
+
 type Pane = 'chat' | 'game';
 
 interface BuildInfo {
@@ -312,31 +331,54 @@ export function RoomScreen({ roomId }: { roomId: string }) {
       }
       await gamegen.sendMessage(sessionId, text);
 
-      // Adaptive poll: fast enough that short steps feel instant.
+      /* Poll until the build produces HTML that differs from what we seeded.
+         Two things this must not do:
+           - treat a missing status as finished. The assistant message has no
+             status for the first moment of its life, and bailing then ends the
+             build before any HTML exists — the generation still completes
+             server-side, so the game appears under Create while the room never
+             hears about it.
+           - trust `remixHtml` over the message snapshots. On a new session it
+             echoes back the seed we passed, which is '' on a first build, and
+             `??` does not fall through an empty string. */
+      const seed = html ?? '';
+      const deadline = Date.now() + 15 * 60_000;
       let attempt = 0;
+      let settling = 0;
+      let posted = false;
+
       for (;;) {
         await new Promise((r) => setTimeout(r, nextDelay(attempt++)));
         const res = await gamegen.messages(sessionId);
-        const last = res.messages?.[res.messages.length - 1];
-        const running = last?.status === 'pending' || last?.status === 'running';
-        if (!running) {
-          const snapshot =
-            res.remixHtml ??
-            [...(res.messages ?? [])].reverse().find((m) => m.htmlSnapshot)?.htmlSnapshot ??
-            null;
-          if (snapshot) {
-            await roomsApi.snapshot(roomId, {
-              html: snapshot,
-              sessionId,
-              title: res.title ?? undefined,
-            });
-            setHtml(snapshot);
-          }
+        const messages = res.messages ?? [];
+        const last = messages[messages.length - 1];
+
+        const snapshot = latestHtml(res.remixHtml, messages);
+        if (snapshot && snapshot !== seed) {
+          await roomsApi.snapshot(roomId, {
+            html: snapshot,
+            sessionId,
+            title: res.title ?? undefined,
+          });
+          setHtml(snapshot);
+          posted = true;
           break;
         }
-        // Give up polling long before the room's own TTL; the result is not lost,
-        // it will be picked up next time the room is opened.
-        if (attempt > 400) break;
+
+        const finished =
+          Boolean(last?.status) && last?.status !== 'pending' && last?.status !== 'running';
+        // Finished, but the snapshot has not landed yet — give it a few more
+        // polls before calling it a failure.
+        if (finished && ++settling > 4) break;
+
+        if (Date.now() > deadline) break;
+      }
+
+      if (!posted) {
+        await roomsApi
+          .buildFailed(roomId, 'That build finished without producing a game.')
+          .catch(() => {});
+        toast('That build did not produce anything.', 'error');
       }
     } catch (e) {
       await roomsApi.buildFailed(roomId, errorMessage(e, 'The build failed.')).catch(() => {});

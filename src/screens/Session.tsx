@@ -113,7 +113,10 @@ export function SessionScreen({ sessionId }: { sessionId: string }) {
     }
   }
 
-  const html = data ? (data.remixHtml ?? lastSnapshot(data.messages)) : null;
+  // A snapshot beats remixHtml, which is only the seed the session started
+  // from — and `??` does not fall through the empty string a session seeded
+  // with no HTML reports, which would blank the preview entirely.
+  const html = data ? (lastSnapshot(data.messages) ?? data.remixHtml ?? null) || null : null;
 
   // Stage each new build with Rust so it can be served on its own origin.
   useEffect(() => {
